@@ -2,10 +2,9 @@ import { Addresses, Crypto, Emulator, Lucid } from "@spacebudz/lucid";
 import { generateMnemonic } from "bip39";
 import { config } from "../../config.ts";
 import { closeChannel } from "../builders/close-channel.ts";
-import { deployScript } from "../builders/deploy-script.ts";
 import { openChannel } from "../builders/open-channel.ts";
-import { SingularityChannelMint } from "../types/plutus.ts";
-import { printUtxos } from "./utils.ts";
+import { validatorDetails } from "../lib/utils.ts";
+import { getScriptRef, printUtxos, signAndSubmit } from "./utils.ts";
 
 const {
   privateKey: senderPrivKey,
@@ -30,23 +29,13 @@ const receiverAddress = Addresses.credentialToAddress(
 const emulator = new Emulator([
   {
     address: senderAddress,
-    assets: { lovelace: 3000000000n, [config.token]: 12n },
+    assets: { lovelace: 30_000_000n, [config.token]: 12n },
   },
 ]);
 const lucid = new Lucid({ provider: emulator });
 await printUtxos(lucid, senderAddress);
 
-const { cbor } = await deployScript(lucid);
-lucid.selectWalletFromPrivateKey(senderPrivKey);
-const txDeployHash = await lucid
-  .fromTx(cbor)
-  .then((txComp) => txComp.sign().commit())
-  .then((txSigned) => txSigned.submit());
-await lucid.awaitTx(txDeployHash);
-const [scriptRef] = await lucid.utxosByOutRef([
-  { txHash: txDeployHash, outputIndex: 0 },
-]);
-
+const scriptRef = await getScriptRef(lucid, senderPrivKey);
 const { openChannelCbor, channelId } = await openChannel(
   lucid,
   {
@@ -54,17 +43,12 @@ const { openChannelCbor, channelId } = await openChannel(
     signerPubKey: senderPubKey,
     receiverAddress: receiverAddress,
     initialDeposit: 6n,
-    expirationDate: 0n,
+    expirationDate: BigInt(Date.now() + 30 * 1000),
     groupId: 10n,
   },
   scriptRef,
 );
-
-lucid.selectWalletFromPrivateKey(senderPrivKey);
-const tx = await lucid.fromTx(openChannelCbor);
-const signedTx = await tx.sign().commit();
-const openTx = await signedTx.submit();
-await lucid.awaitTx(openTx);
+const openTx = await signAndSubmit(lucid, senderPrivKey, openChannelCbor);
 
 console.log(`\n
     > Channel opened with ID: ${channelId}
@@ -73,8 +57,7 @@ console.log(`\n
     > CBOR: ${openChannelCbor}\n\n`);
 
 await printUtxos(lucid, senderAddress);
-const validator = new SingularityChannelMint();
-const scriptAddress = lucid.newScript(validator).toAddress();
+const { scriptAddress } = validatorDetails(lucid);
 const utxosAtScript = await lucid.utxosAt(scriptAddress);
 printUtxos(lucid, undefined, utxosAtScript);
 
@@ -82,12 +65,9 @@ const { closedChannelCbor } = await closeChannel(
   lucid,
   { senderAddress, channelId },
   scriptRef,
+  BigInt(Date.now() + 31 * 1000),
 );
-lucid.selectWalletFromPrivateKey(senderPrivKey);
-const updateTx = await lucid.fromTx(closedChannelCbor);
-const signedCloseTx = await updateTx.sign().commit();
-const closedTx = await signedCloseTx.submit();
-await lucid.awaitTx(closedTx);
+const closedTx = await signAndSubmit(lucid, senderPrivKey, closedChannelCbor);
 
 console.log(`\n
     > Channel closed with ID: ${channelId}

@@ -1,4 +1,5 @@
 import { Lucid, Utxo } from "@spacebudz/lucid";
+import { deployScript } from "../builders/deploy-script.ts";
 import { ChannelInfo } from "../types/types.ts";
 
 const pad = (text = "", length = 80, padChar = "-") => {
@@ -27,4 +28,31 @@ export const printChannels = (
   console.log(pad(header));
   console.dir(channels, { depth: null });
   console.log(pad());
+};
+
+export const signAndSubmit = async (
+  lucid: Lucid,
+  privKey: string,
+  cbor: string,
+) => {
+  lucid.selectWalletFromPrivateKey(privKey);
+  const txToSign = await lucid.fromTx(cbor);
+  const signedTx = await txToSign.sign().commit();
+  const tx = await signedTx.submit();
+  await lucid.awaitTx(tx);
+  return tx;
+};
+
+export const getScriptRef = async (lucid: Lucid, privKey: string) => {
+  const { cbor } = await deployScript(lucid);
+  lucid.selectWalletFromPrivateKey(privKey);
+  const txDeployHash = await lucid
+    .fromTx(cbor)
+    .then((txComp) => txComp.sign().commit())
+    .then((txSigned) => txSigned.submit());
+  await lucid.awaitTx(txDeployHash);
+  const [scriptRef] = await lucid.utxosByOutRef([
+    { txHash: txDeployHash, outputIndex: 0 },
+  ]);
+  return scriptRef;
 };

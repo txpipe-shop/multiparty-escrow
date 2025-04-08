@@ -1,11 +1,10 @@
 import { Addresses, Crypto, Emulator, Lucid } from "@spacebudz/lucid";
 import { generateMnemonic } from "bip39";
 import { config } from "../../config.ts";
-import { deployScript } from "../builders/deploy-script.ts";
 import { openChannel } from "../builders/open-channel.ts";
 import { updateChannel } from "../builders/update-channel.ts";
-import { ChannelValidator } from "../types/types.ts";
-import { printUtxos } from "./utils.ts";
+import { validatorDetails } from "../lib/utils.ts";
+import { getScriptRef, printUtxos, signAndSubmit } from "./utils.ts";
 
 const {
   privateKey: senderPrivKey,
@@ -36,16 +35,8 @@ const emulator = new Emulator([
 const lucid = new Lucid({ provider: emulator });
 await printUtxos(lucid, senderAddress);
 
-const { cbor } = await deployScript(lucid);
-lucid.selectWalletFromPrivateKey(senderPrivKey);
-const txDeployHash = await lucid
-  .fromTx(cbor)
-  .then((txComp) => txComp.sign().commit())
-  .then((txSigned) => txSigned.submit());
-await lucid.awaitTx(txDeployHash);
-const [scriptRef] = await lucid.utxosByOutRef([
-  { txHash: txDeployHash, outputIndex: 0 },
-]);
+const scriptRef = await getScriptRef(lucid, senderPrivKey);
+
 const { openChannelCbor, channelId } = await openChannel(
   lucid,
   {
@@ -58,12 +49,7 @@ const { openChannelCbor, channelId } = await openChannel(
   },
   scriptRef,
 );
-
-const tx = await lucid.fromTx(openChannelCbor);
-lucid.selectWalletFromPrivateKey(senderPrivKey);
-const signedTx = await tx.sign().commit();
-const openTx = await signedTx.submit();
-await lucid.awaitTx(openTx);
+const openTx = await signAndSubmit(lucid, senderPrivKey, openChannelCbor);
 
 console.log(`\n
     > Channel opened with ID: ${channelId}
@@ -72,8 +58,7 @@ console.log(`\n
     > CBOR: ${openChannelCbor}\n\n`);
 
 await printUtxos(lucid, senderAddress);
-const validator = new ChannelValidator();
-const scriptAddress = lucid.newScript(validator).toAddress();
+const { scriptAddress } = validatorDetails(lucid);
 const utxosAtScript = await lucid.utxosAt(scriptAddress);
 printUtxos(lucid, undefined, utxosAtScript);
 
@@ -84,15 +69,12 @@ const { updatedChannelCbor } = await updateChannel(
     senderAddress,
     channelId,
     addDeposit: 3n,
-    expirationDate: BigInt(Date.now()) + 5n * 24n * 60n * 60n * 1000n,
+    expirationDate: BigInt(Date.now() + 5 * 24 * 60 * 60 * 1000),
   },
   scriptRef,
+  BigInt(Date.now() + 4 * 60 * 60 * 1000),
 );
-lucid.selectWalletFromPrivateKey(senderPrivKey);
-const updateTx = await lucid.fromTx(updatedChannelCbor);
-const signedUpdateTx = await updateTx.sign().commit();
-const updatedTx = await signedUpdateTx.submit();
-await lucid.awaitTx(updatedTx);
+const updatedTx = await signAndSubmit(lucid, senderPrivKey, updatedChannelCbor);
 
 console.log(`\n
     > Channel updated with ID: ${channelId}

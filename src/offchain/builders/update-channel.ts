@@ -4,8 +4,9 @@ import {
   fromChannelDatum,
   toChannelDatum,
   toChannelRedeemer,
+  validatorDetails,
 } from "../lib/utils.ts";
-import { ChannelDatum, ChannelValidator } from "../types/types.ts";
+import { ChannelDatum } from "../types/types.ts";
 import { UpdateChannelParams } from "./../../shared/api-types.ts";
 
 export const updateChannel = async (
@@ -18,20 +19,13 @@ export const updateChannel = async (
     senderAddress,
   }: UpdateChannelParams,
   scriptRef: Utxo,
+  currentTime: bigint,
 ) => {
-  const validator = new ChannelValidator();
-  const scriptAddress = Addresses.scriptToAddress(lucid.network, validator);
-  const scriptAddressDetails = Addresses.inspect(scriptAddress).payment;
-  if (!scriptAddressDetails) throw new Error("Script credentials not found");
-  const scriptHash = scriptAddressDetails.hash;
+  const { scriptAddress, scriptHash } = validatorDetails(lucid);
 
-  const senderDetails = Addresses.inspect(senderAddress).payment;
-  if (!senderDetails) throw new Error("Sender's credentials not found");
-  const senderPubKeyHash = senderDetails.hash;
+  const senderPubKeyHash = Addresses.addressToCredential(senderAddress).hash;
 
-  const userDetails = Addresses.inspect(userAddress).payment;
-  if (!userDetails) throw new Error("User's credentials not found");
-  const userPubKeyHash = userDetails.hash;
+  const userPubKeyHash = Addresses.addressToCredential(userAddress).hash;
 
   const channelToken = toUnit(scriptHash, senderPubKeyHash);
   const channelUtxo = (
@@ -51,13 +45,12 @@ export const updateChannel = async (
       return false;
     }
   });
-
   if (!channelUtxo) throw new Error("Channel not found");
 
   const datumStr = channelUtxo.datum!;
   const datum: ChannelDatum = fromChannelDatum(datumStr);
 
-  if (datum.expirationDate < Date.now()) throw new Error("Channel expired");
+  if (datum.expirationDate < currentTime) throw new Error("Channel expired");
   if (expirationDate && expirationDate < datum.expirationDate)
     throw new Error("New expiration date must be greater than current");
 

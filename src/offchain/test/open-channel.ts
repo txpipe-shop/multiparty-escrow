@@ -1,13 +1,17 @@
 import { Addresses, Crypto, Emulator, Lucid } from "@spacebudz/lucid";
 import { generateMnemonic } from "bip39";
 import { config } from "../../config.ts";
-import { deployScript } from "../builders/deploy-script.ts";
 import { openChannel } from "../builders/open-channel.ts";
 import { getAllChannels } from "../queries/all-channels.ts";
 import { getChannelById } from "../queries/channel-by-id.ts";
 import { getChannelsFromReceiver } from "../queries/channels-from-receiver.ts";
 import { getChannelsFromSender } from "../queries/channels-from-sender.ts";
-import { printChannels, printUtxos } from "./utils.ts";
+import {
+  getScriptRef,
+  printChannels,
+  printUtxos,
+  signAndSubmit,
+} from "./utils.ts";
 
 const {
   privateKey: senderPrivKey,
@@ -40,16 +44,7 @@ await printUtxos(lucid, senderAddress);
 
 printChannels("GET ALL CHANNELS BEFORE TX", await getAllChannels(lucid));
 
-const { cbor } = await deployScript(lucid);
-lucid.selectWalletFromPrivateKey(senderPrivKey);
-const txDeployHash = await lucid
-  .fromTx(cbor)
-  .then((txComp) => txComp.sign().commit())
-  .then((txSigned) => txSigned.submit());
-await lucid.awaitTx(txDeployHash);
-const [scriptRef] = await lucid.utxosByOutRef([
-  { txHash: txDeployHash, outputIndex: 0 },
-]);
+const scriptRef = await getScriptRef(lucid, senderPrivKey);
 
 const { openChannelCbor, channelId } = await openChannel(
   lucid,
@@ -63,11 +58,7 @@ const { openChannelCbor, channelId } = await openChannel(
   },
   scriptRef,
 );
-const tx = await lucid.fromTx(openChannelCbor);
-lucid.selectWalletFromPrivateKey(senderPrivKey);
-const signedTx = await tx.sign().commit();
-const openTx = await signedTx.submit();
-await lucid.awaitTx(openTx);
+const openTx = await signAndSubmit(lucid, senderPrivKey, openChannelCbor);
 
 console.log(`\n
     > Channel opened with ID: ${channelId}
