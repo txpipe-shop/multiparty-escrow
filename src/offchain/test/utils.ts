@@ -1,4 +1,5 @@
-import { Lucid, Utxo } from "@spacebudz/lucid";
+import { Addresses, Crypto, Lucid, Utxo } from "@spacebudz/lucid";
+import { generateMnemonic } from "bip39";
 import { deployScript } from "../builders/deploy-script.ts";
 import { ChannelInfo } from "../types/types.ts";
 
@@ -16,9 +17,9 @@ export const printUtxos = async (
   if (address) lucid.selectReadOnlyWallet({ address });
   const walletUtxos = utxos ?? (await lucid.wallet.getUtxos());
   const title = address ? "WALLET UTXOS" : "SCRIPT UTXOS";
-  console.log(pad(title));
+  console.log("\x1b[34m%s\x1b[0m", pad(title));
   console.dir(walletUtxos, { depth: null });
-  console.log(pad());
+  console.log("\x1b[34m%s\x1b[0m", pad());
 };
 
 export const printChannels = (
@@ -55,4 +56,14 @@ export const getScriptRef = async (lucid: Lucid, privKey: string) => {
     { txHash: txDeployHash, outputIndex: 0 },
   ]);
   return scriptRef;
+};
+
+export const getRandomUser = () => {
+  const { privateKey, publicKey, credential } = Crypto.seedToDetails(
+    generateMnemonic(256),
+    0,
+    "Payment",
+  );
+  const address = Addresses.credentialToAddress({ Emulator: 0 }, credential);
+  return { privateKey, publicKey, address };
 };
