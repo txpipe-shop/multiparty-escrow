@@ -15,6 +15,7 @@ name = "aiken-lang/stdlib"
 version = "v2.2.0"
 source = "github"
 
+<<<<<<< HEAD
 [[dependencies]]
 name = "sidan-lab/vodka"
 version = "0.1.13"
@@ -27,3 +28,13 @@ encoding = "base16"
 [config.default.agix_policy]
 bytes = "921e27e15e2552a40515564ba10a26ecb1fe1a34ac6ccb58c1ce1320"
 encoding = "base16"
+=======
+[config]
+[config.default.agix_policy]
+bytes = "921e27e15e2552a40515564ba10a26ecb1fe1a34ac6ccb58c1ce1320"
+encoding = "hex"
+
+[config.default.agix_hexa]
+bytes = "41474958"
+encoding = "hex"
+>>>>>>> 5ef39a2 (WIP: implement recursive checks on inputs and outputs on withdraw validator)
