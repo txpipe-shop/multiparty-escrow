@@ -122,8 +122,8 @@ validator channel {
         let withdraw_running =
           get_first(redeemers, Withdraw(script_hash)) |> is_some()
         and {
-          withdraw_running?,
           signed_by_receiver?,
+          withdraw_running?,
         }
       }
 
