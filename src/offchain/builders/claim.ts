@@ -6,7 +6,7 @@ import {
   toUnit,
   Utxo,
 } from "@spacebudz/lucid";
-import { config, env } from "../../config.ts";
+import { config } from "../../config.ts";
 import { ClaimChannelParams } from "../../shared/api-types.ts";
 import {
   fromChannelDatum,
@@ -21,7 +21,7 @@ export const claim = async (
   params: ClaimChannelParams,
   scriptRef: Utxo,
   currentTime: bigint,
-  receiverAddress: string
+  receiverAddress: string,
 ): Promise<{ claimChannelCbor: string }> => {
   const { scriptHash, scriptRewardAddress } = validatorDetails(lucid);
   lucid.selectReadOnlyWallet({ address: receiverAddress });
@@ -84,25 +84,25 @@ export const claim = async (
         tx.mint({ [channelToken]: -1n }, Data.void());
         tx.payTo(
           senderAddress,
-          addAssets(valueResult, { [channelToken]: -1n })
+          addAssets(valueResult, { [channelToken]: -1n }),
         );
       } else {
         // Build continuing output
         tx.payToContract(
           utxo.address,
           { Inline: toChannelDatum({ ...datum, nonce: datum.nonce + 1n }) },
-          valueResult
+          valueResult,
         );
       }
       // Collect channel utxo and accumulate receiver payout
       tx.collectFrom(
         [utxo],
-        toChannelRedeemer({ Claim: { amount, signature, finalize } })
+        toChannelRedeemer({ Claim: { amount, signature, finalize } }),
       );
       receiverAmount += amount;
     } catch (e) {
       console.error(
-        `Error claiming channel with id: ${channelId}, skipping...`
+        `Error claiming channel with id: ${channelId}, skipping...`,
       );
       console.error(e);
     }
