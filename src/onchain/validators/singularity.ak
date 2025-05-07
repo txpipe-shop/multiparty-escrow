@@ -116,14 +116,16 @@ validator channel {
 
     when redeemer is {
       Claim { .. } -> {
+        trace cbor.diagnostic(Withdraw(script_hash))
+        trace cbor.diagnostic(redeemers)
         let signed_by_receiver =
           any(extra_signatories, fn(signatory) { signatory == receiver })
         // The withdraw purpose of the script is being run
         let withdraw_running =
           get_first(redeemers, Withdraw(script_hash)) |> is_some()
         and {
-          signed_by_receiver?,
           withdraw_running?,
+          signed_by_receiver?,
         }
       }
 
