@@ -2,12 +2,13 @@ use aiken/cbor.{serialise}
 use aiken/collection/dict.{to_pairs}
 use aiken/collection/list.{any, filter, length, map, take}
 use aiken/collection/pairs.{get_first}
-use aiken/interval.{is_entirely_before}
+use aiken/interval.{is_entirely_after, is_entirely_before}
 use aiken/option.{is_some}
 use aiken/primitive/bytearray.{compare, concat}
 use cardano/address.{Address, Credential, Script}
 use cardano/assets.{
-  PolicyId, flatten, lovelace_of, quantity_of, restricted_to, tokens, zero,
+  PolicyId, flatten, from_asset, lovelace_of, quantity_of, restricted_to, tokens,
+  zero,
 }
 use cardano/transaction.{
   InlineDatum, Input, Output, OutputReference, Spend, Transaction, Withdraw,
@@ -15,7 +16,7 @@ use cardano/transaction.{
 }
 use checks.{check_claims}
 use config
-use types.{Action, Claim, Datum, Update}
+use types.{Action, Claim, Close, Datum, Update}
 
 validator channel {
   mint(_redeemer: Data, policy_id: PolicyId, self: Transaction) {
@@ -97,92 +98,56 @@ validator channel {
     self: Transaction,
   ) {
     let Transaction {
+      inputs,
+      outputs,
       mint,
       redeemers,
-      outputs,
       validity_range,
       extra_signatories,
-      inputs,
       ..
     } = self
     expect Some(Input {
-      output: Output {
-        address: Address { payment_credential: script_hash, .. },
-        ..
-      },
+      output: Output { address: own_address, value: in_value, .. },
       ..
     }) = find_input(inputs, utxo)
-    expect Some(Datum { receiver, .. }) = datum
+    expect Address { payment_credential: script_cred, stake_credential: None } =
+      own_address
+    expect Script(script_hash) = script_cred
+    expect Some(i_datum) = datum
+    let Datum { receiver, expiration_date: i_expiration_date, .. } = i_datum
 
     when redeemer is {
-      Claim { .. } -> {
-        let signed_by_receiver =
-          any(extra_signatories, fn(signatory) { signatory == receiver })
-        // The withdraw purpose of the script is being run
-        let withdraw_running =
-          get_first(redeemers, Withdraw(script_hash)) |> is_some()
-        and {
-          withdraw_running?,
-          signed_by_receiver?,
-        }
-      }
-
       Update -> {
-        // [INPUTS]
-        // Only one script input of self address
-        expect Some(script_input) = find_input(inputs, utxo)
-
-        expect Input {
-          output: Output {
-            address: i_address,
-            value: i_value,
-            reference_script: None,
-            ..
-          },
-          ..
-        } = script_input
-
-        expect
-          length(filter(inputs, fn(i) { i.output.address == i_address })) == 1
-
-        expect Address {
-          payment_credential: Script(script_hash),
-          stake_credential: None,
-        } = i_address
-
-        expect Some(i_datum) = datum
-
-        let Datum { expiration_date: i_expiration_date, .. } = i_datum
-
         // [OUTPUTS]
         // Enforce channel to be the first output
         expect [channel_output, ..] = outputs
-
         expect Output {
           address: o_address,
           value: o_val,
           datum: InlineDatum(o_data),
           reference_script: None,
         } = channel_output
-
         expect o_datum: Datum = o_data
 
         // [TRANSACTION]
-        expect [Pair(sender_pk, 1)] = i_value |> tokens(script_hash) |> to_pairs
+        expect [Pair(sender_pk, 1)] =
+          in_value |> tokens(script_hash) |> to_pairs
 
         // AGIX amount on output value >= AGIX amount on input value && remaining values are unchanged
         let o_vals_are_correct = and {
-            (quantity_of(i_value, config.agix_policy, config.agix_hexa) <= quantity_of(
+            (quantity_of(in_value, config.agix_policy, config.agix_hexa) <= quantity_of(
               o_val,
               config.agix_policy,
               config.agix_hexa,
             ))?,
             (quantity_of(o_val, script_hash, sender_pk) == 1)?,
-            (lovelace_of(o_val) >= lovelace_of(i_value))?,
+            (lovelace_of(o_val) >= lovelace_of(in_value))?,
             (length(flatten(o_val)) == 3)?,
           }
 
         and {
+          // Only one script input of self address
+          (length(filter(inputs, fn(i) { i.output.address == own_address })) == 1)?,
           // No tokens with this policy are minted nor burned
           restricted_to(mint, [script_hash]) == zero,
           // Channel is valid
@@ -194,7 +159,7 @@ validator channel {
             True
           }?,
           // Output preserves script address
-          (o_address == i_address)?,
+          (o_address == own_address)?,
           o_vals_are_correct?,
           // Only can update the expiration date
           (o_datum == Datum {
@@ -206,7 +171,35 @@ validator channel {
         }
       }
 
-      _ -> True
+      Claim { .. } -> and {
+          // The withdraw purpose of the script is being run
+          (get_first(redeemers, Withdraw(script_cred)) |> is_some())?,
+          // Signed by receiver
+          any(extra_signatories, fn(signatory) { signatory == receiver })?,
+        }
+
+      Close -> {
+        // Only one script input
+        expect [_self_input] =
+          inputs |> filter(fn(i) { i.output.address == own_address })
+
+        // Lookup channel token in the input
+        expect Script(own_policy) = script_cred
+        expect [Pair(sender_pkh, 1)] =
+          in_value |> tokens(own_policy) |> to_pairs()
+
+        // Get self policy tokens on the mint field
+        let self_policy_burn = restricted_to(mint, [own_policy])
+
+        and {
+          // Burns only one token of the self policy
+          (self_policy_burn == from_asset(own_policy, sender_pkh, -1))?,
+          // Signed by the sender
+          any(extra_signatories, fn(signatory) { signatory == sender_pkh })?,
+          // Channel is expired
+          is_entirely_after(validity_range, i_expiration_date)?,
+        }
+      }
     }
   }
 
