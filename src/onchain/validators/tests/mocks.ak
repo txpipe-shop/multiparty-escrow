@@ -14,6 +14,8 @@ pub const tx_hash_1 = mock_tx_hash(0)
 
 pub const tx_hash_2 = mock_tx_hash(1)
 
+pub const tx_hash_3 = mock_tx_hash(2)
+
 pub const seed_utxo_1 =
   OutputReference { transaction_id: tx_hash_1, output_index: 0 }
 
@@ -48,6 +50,11 @@ pub const sender_2_address =
   }
 
 pub const receiver_1 = mock_key_hash(3)
+pub const receiver_1_address =
+  Address {
+    payment_credential: VerificationKey(receiver_1),
+    stake_credential: None,
+  }
 
 pub const signer_1 =
   #"145562a792f2ca28ae87f1f7afd25b126f76547103204f62432999bcc2b5c542"
