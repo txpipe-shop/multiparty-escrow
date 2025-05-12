@@ -121,6 +121,8 @@ export const claim = async (
     .payTo(receiverAddress, receiverPayout)
     .validTo(Number(lowestExpDate))
     .attachMetadata(674, { msg })
+    .withdraw(scriptRewardAddress, 0n, Data.void())
+    .addSigner(Addresses.addressToCredential(receiverAddress).hash)
     .commit();
 
   return { claimChannelCbor: txComplete.toString() };

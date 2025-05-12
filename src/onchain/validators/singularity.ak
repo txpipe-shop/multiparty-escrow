@@ -20,7 +20,15 @@ use types.{Action, Claim, Close, Datum, Update}
 
 validator channel {
   mint(_redeemer: Data, policy_id: PolicyId, self: Transaction) {
-    let Transaction { inputs, mint, outputs, validity_range, .. } = self
+    let Transaction {
+      inputs,
+      mint,
+      outputs,
+      validity_range,
+      redeemers,
+      withdrawals,
+      ..
+    } = self
     expect [(_, minted_name, minted_quantity)] = mint |> flatten
 
     if minted_quantity > 0 {
@@ -87,7 +95,27 @@ validator channel {
         group_id_is_bytearray?,
       }
     } else {
-      True
+      let withdraw_am = get_first(withdrawals, Script(policy_id))
+      when withdraw_am is {
+        Some(am) -> am >= 0
+        _ -> {
+          expect [script_input] =
+            filter(
+              inputs,
+              fn(i) {
+                i.output.address == Address {
+                  payment_credential: Script(policy_id),
+                  stake_credential: None,
+                }
+              },
+            )
+          let Input { output_reference, .. } = script_input
+          expect Some(close_redeemer) =
+            get_first(redeemers, Spend(output_reference))
+          expect Close = close_redeemer
+          minted_quantity == -1
+        }
+      }
     }
   }
 
