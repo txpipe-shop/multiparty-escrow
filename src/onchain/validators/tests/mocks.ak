@@ -1,6 +1,10 @@
+use aiken/cbor.{serialise}
 use aiken/primitive/bytearray.{concat}
 use cardano/address.{Address, Script, VerificationKey}
+use cardano/assets.{ada_asset_name, ada_policy_id, add, from_asset}
 use cardano/transaction.{OutputReference}
+use cocktail.{address_pub_key}
+use config
 use mocktail.{mock_key_hash, mock_tx_hash}
 
 // Script hash and minting policy
@@ -19,12 +23,12 @@ pub const tx_hash_3 = mock_tx_hash(2)
 pub const seed_utxo_1 =
   OutputReference { transaction_id: tx_hash_1, output_index: 0 }
 
-pub const channel_id_1 = concat(tx_hash_1, "0")
+pub const channel_id_1 = concat(tx_hash_1, serialise(0))
 
 pub const seed_utxo_2 =
   OutputReference { transaction_id: tx_hash_2, output_index: 0 }
 
-pub const channel_id_2 = concat(tx_hash_2, "0")
+pub const channel_id_2 = concat(tx_hash_2, serialise(0))
 
 pub const channel_1_out_ref =
   OutputReference { transaction_id: mock_tx_hash(100), output_index: 0 }
@@ -58,6 +62,24 @@ pub const receiver_1_address =
 
 pub const signer_1 =
   #"145562a792f2ca28ae87f1f7afd25b126f76547103204f62432999bcc2b5c542"
+
+// Channel token
+pub const channel_token = {
+    expect Some(pub_key_hash) = address_pub_key(sender_1_address)
+    from_asset(own_hash, pub_key_hash, 1)
+  }
+
+// Burned asset
+pub const burned_asset = {
+    expect Some(pub_key_hash) = address_pub_key(sender_1_address)
+    from_asset(own_hash, pub_key_hash, -1)
+  }
+
+// Default value
+pub const default_value =
+  channel_token
+    |> add(ada_policy_id, ada_asset_name, 4_000_000)
+    |> add(config.agix_policy, config.agix_hexa, 1_000_000)
 
 // Group id
 pub const group_id = mock_key_hash(42)
