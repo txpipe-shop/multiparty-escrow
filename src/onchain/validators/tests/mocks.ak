@@ -61,7 +61,7 @@ pub const receiver_1_address =
   }
 
 pub const signer_1 =
-  #"145562a792f2ca28ae87f1f7afd25b126f76547103204f62432999bcc2b5c542"
+  #"0a0b0bddc14de4b88bd3e9cc7d29886ce1bb637b81dbcc3a87d6992822dd1eab"
 
 // Channel token
 pub const channel_token = {
@@ -86,7 +86,7 @@ pub const group_id = mock_key_hash(42)
 
 // Signature for amount 20, nonce 0
 pub const signature_1 =
-  #"2b40f5776b30df3ee894b95232d47cdf7d66a9b521bdbdafab20c9f0c4b9b78717ded59d250ae59b3d8904462e4ded30c97b84eb3c5793b72cca83499bc00204"
+  #"6b3b30460287fddc53c26b5d611c3550f21cebdd1326dbb4f159ed9d243d7702b599bb383151703f3bf3754827a4756bf56e6ac6fa76763ca5d8315bb71add09"
 
 pub const signature_2 =
-  #"b2ab64bec64b766212290a48474fd2a17cf576e6a9fc9141e16418e699f21e36b5afe33467b4a38dbae56fda18c78f6b14864e4f6337365b847f692a3de0cc02"
+  #"371a54ae59cfd67bb1cc423ee30c2421415f7a1ea6a1c5bffe8d380dce44b6824b8802bebb0f077d21cfbc42a9ea2ea4f212479bcbd8bb118f37164e073c8205"
