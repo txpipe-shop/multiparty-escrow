@@ -70,18 +70,18 @@ validator channel {
       and {
         // Only one token minted
         (minted_quantity == 1)?,
-        // Check output has self script address
-        (script_hash == policy_id)?,
-        // Check length of token name is 28 bytes long
+        // Check length of the minted token name is 28 bytes long (as a pubkey hash)
         (bytearray.length(minted_name) == 28)?,
+        // Check output's address script credential is equal to the self policy
+        (script_hash == policy_id)?,
         channel_utxo_has_correct_value?,
         // ChannelId = txHash + outputIndex of the first input
         (compare(channel_id, concat(transaction_id, serialise(output_index))) == Equal)?,
         // Expiration date > validity range upper bound
         is_entirely_before(validity_range, expiration_date)?,
-        // Check Receiver field is 28 bytes long
+        // Check Receiver field is 28 bytes long (as a pubkey hash)
         (bytearray.length(receiver) == 28)?,
-        // Check Signer field is 32 bytes long
+        // Check Signer field is 32 bytes long (as a public key)
         (bytearray.length(signer) == 32)?,
         // Group Id: any ByteArray
         (bytearray.length(group_id) > 0)?,
@@ -91,8 +91,8 @@ validator channel {
       when withdraw_am is {
         // Check wether a Withdraw validator is running
         Some(am) -> am >= 0
-        // Or there is a script input
         _ -> {
+          // Or there is a script input
           expect [script_input] =
             filter(
               inputs,
@@ -104,9 +104,9 @@ validator channel {
               },
             )
           let Input { output_reference, .. } = script_input
+          // with a "Close" redeemer
           expect Some(close_redeemer) =
             get_first(redeemers, Spend(output_reference))
-          // with a "Close" redeemer
           expect Close = close_redeemer
           // and the amount burned is exactly -1
           minted_quantity == -1
