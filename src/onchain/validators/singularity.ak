@@ -32,7 +32,14 @@ validator channel {
     expect [(_, minted_name, minted_quantity)] = mint |> flatten
 
     if minted_quantity > 0 {
-      let one_token_minted = minted_quantity == 1
+      // [INPUTS]
+      expect [first_input, ..] = inputs
+      let Input {
+        output_reference: OutputReference { transaction_id, output_index },
+        output: _,
+      } = first_input
+
+      // [OUTPUTS]
       expect [channel_output, ..] = outputs
       expect Output {
         address: Address {
@@ -40,27 +47,9 @@ validator channel {
           stake_credential: None,
         },
         value: val,
-        datum: InlineDatum(dat),
+        datum: InlineDatum(o_datum),
         reference_script: None,
       } = channel_output
-
-      // Check output has self script address
-      let has_script_addr = script_hash == policy_id
-
-      // Has only Lovelace, the minted control token, and an amount > 0 of AGIX
-      let channel_utxo_has_correct_value = and {
-          (list.length(flatten(val)) == 3)?,
-          (quantity_of(val, policy_id, minted_name) == 1)?,
-          (quantity_of(val, config.agix_policy, config.agix_hexa) > 0)?,
-        }
-
-      let length_of_name = bytearray.length(minted_name) == 28
-
-      expect [first_input, ..] = inputs
-      let Input {
-        output_reference: OutputReference { transaction_id, output_index },
-        output: _,
-      } = first_input
 
       expect Datum {
         channel_id,
@@ -69,35 +58,40 @@ validator channel {
         receiver,
         group_id,
         expiration_date,
-      } = dat
+      } = o_datum
 
-      let channel_id_is_correct =
-        compare(channel_id, concat(transaction_id, serialise(output_index))) == Equal
-
-      let expiration_date_is_correct =
-        is_entirely_before(validity_range, expiration_date)
-
-      let length_of_receiver = bytearray.length(receiver) == 28
-
-      let length_of_signer = bytearray.length(signer) == 32
-
-      let group_id_is_bytearray = bytearray.length(group_id) > 0
+      // Has only Lovelace, the minted control token, and an amount > 0 of AGIX
+      let channel_utxo_has_correct_value = and {
+          (list.length(flatten(val)) == 3)?,
+          (quantity_of(val, policy_id, minted_name) == 1)?,
+          (quantity_of(val, config.agix_policy, config.agix_hexa) > 0)?,
+        }
 
       and {
-        one_token_minted?,
-        has_script_addr?,
-        length_of_name?,
+        // Only one token minted
+        (minted_quantity == 1)?,
+        // Check output has self script address
+        (script_hash == policy_id)?,
+        // Check length of token name is 28 bytes long
+        (bytearray.length(minted_name) == 28)?,
         channel_utxo_has_correct_value?,
-        channel_id_is_correct?,
-        expiration_date_is_correct?,
-        length_of_receiver?,
-        length_of_signer?,
-        group_id_is_bytearray?,
+        // ChannelId = txHash + outputIndex of the first input
+        (compare(channel_id, concat(transaction_id, serialise(output_index))) == Equal)?,
+        // Expiration date > validity range upper bound
+        is_entirely_before(validity_range, expiration_date)?,
+        // Check Receiver field is 28 bytes long
+        (bytearray.length(receiver) == 28)?,
+        // Check Signer field is 32 bytes long
+        (bytearray.length(signer) == 32)?,
+        // Group Id: any ByteArray
+        (bytearray.length(group_id) > 0)?,
       }
     } else {
       let withdraw_am = get_first(withdrawals, Script(policy_id))
       when withdraw_am is {
+        // Check wether a Withdraw validator is running
         Some(am) -> am >= 0
+        // Or there is a script input
         _ -> {
           expect [script_input] =
             filter(
@@ -112,7 +106,9 @@ validator channel {
           let Input { output_reference, .. } = script_input
           expect Some(close_redeemer) =
             get_first(redeemers, Spend(output_reference))
+          // with a "Close" redeemer
           expect Close = close_redeemer
+          // and the amount burned is exactly -1
           minted_quantity == -1
         }
       }
