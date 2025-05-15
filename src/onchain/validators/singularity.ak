@@ -25,8 +25,6 @@ validator channel {
       mint,
       outputs,
       validity_range,
-      redeemers,
-      withdrawals,
       ..
     } = self
     expect [(_, minted_name, minted_quantity)] = mint |> flatten
@@ -87,31 +85,7 @@ validator channel {
         (bytearray.length(group_id) > 0)?,
       }
     } else {
-      let withdraw_am = get_first(withdrawals, Script(policy_id))
-      when withdraw_am is {
-        // Check wether a Withdraw validator is running
-        Some(am) -> am >= 0
-        _ -> {
-          // Or there is a script input
-          expect [script_input] =
-            filter(
-              inputs,
-              fn(i) {
-                i.output.address == Address {
-                  payment_credential: Script(policy_id),
-                  stake_credential: None,
-                }
-              },
-            )
-          let Input { output_reference, .. } = script_input
-          // with a "Close" redeemer
-          expect Some(close_redeemer) =
-            get_first(redeemers, Spend(output_reference))
-          expect Close = close_redeemer
-          // and the amount burned is exactly -1
-          minted_quantity == -1
-        }
-      }
+      True
     }
   }
 
