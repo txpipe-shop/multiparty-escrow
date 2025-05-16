@@ -1,8 +1,8 @@
 import dotenv from "dotenv";
 import fs from "fs";
 import { z } from "zod";
-dotenv.config();
 
+dotenv.config();
 const envSchema = z
   .object({
     PORT: z
