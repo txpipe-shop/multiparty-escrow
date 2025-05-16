@@ -55,6 +55,8 @@ const networkToId = (network: Network) => {
       return 1;
     case "Preprod":
       return 0;
+    case "Preview":
+      return 0;
     default:
       throw new Error("Invalid network");
   }
@@ -101,10 +103,10 @@ export const OutRef = z.string(); // txHash + outputIndex
 
 export const OpenChannelSchema = z.object({
   senderAddress: addressSchema,
-  signerPubKey: z.string(),
+  signerPubKey: z.string().length(64),
   receiverAddress: addressSchema,
-  initialDeposit: z.bigint(),
-  expirationDate: z.bigint(),
+  initialDeposit: z.bigint().min(1n),
+  expirationDate: z.bigint().min(0n),
   groupId: z.string(),
 });
 

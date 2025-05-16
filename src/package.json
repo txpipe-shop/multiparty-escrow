@@ -25,6 +25,7 @@
   "type": "module",
   "dependencies": {
     "@dcspark/cardano-multiplatform-lib-nodejs": "^6.2.0",
+    "@ptkdev/logger": "^1.8.0",
     "@spacebudz/lucid": "npm:@jsr/spacebudz__lucid@^0.20.9",
     "axios": "^1.6.2",
     "big-number": "^2.0.0",
