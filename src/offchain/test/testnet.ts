@@ -12,7 +12,12 @@ import {
   testOpenOperation,
   testUpdateOperation,
 } from "./operations.ts";
-import { getScriptRef, printChannels } from "./utils.ts";
+import {
+  getCMLPrivateKey,
+  getScriptRef,
+  printChannels,
+  signMessage,
+} from "./utils.ts";
 
 const prompt = promptSync();
 
@@ -47,7 +52,7 @@ const actions: Record<ActionKey, () => Promise<void>> = {
         senderAddress: address,
         receiverAddress,
         signerPubKey: publicKey,
-        groupId: groupId,
+        groupId,
         expirationDate: BigInt(expirationDate),
         initialDeposit: BigInt(initialDeposit),
         currentTime: BigInt(Date.now()),
@@ -78,7 +83,7 @@ const actions: Record<ActionKey, () => Promise<void>> = {
     );
   },
   3: async () => {
-    console.log("\n[Building a message (as Receiver)]");
+    console.log("\n[Building a message (as Signer)]");
     const channelId = prompt("Channel ID: ");
     const amount = prompt("Amount: ");
     const senderAddress = prompt("Sender Address: ");
@@ -88,10 +93,11 @@ const actions: Record<ActionKey, () => Promise<void>> = {
       senderAddress,
     });
     lucid.selectWalletFromPrivateKey(privateKey);
-    const message = await lucid.wallet.signMessage(address, payload);
+    const privKey = getCMLPrivateKey(seed);
+    const signature = await signMessage(privKey, payload);
 
     console.log("Signed Message:");
-    console.log(message);
+    console.log(signature);
   },
   4: async () => {
     console.log("\n[Closing a channel]");

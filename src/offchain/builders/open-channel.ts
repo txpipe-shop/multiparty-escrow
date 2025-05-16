@@ -8,7 +8,7 @@ import {
 } from "@spacebudz/lucid";
 import { config } from "../../config.ts";
 import { OpenChannelParams } from "../../shared/api-types.ts";
-import { toChannelDatum, validatorDetails } from "../lib/utils.ts";
+import { selectUTxOs, toChannelDatum, validatorDetails } from "../lib/utils.ts";
 import { ChannelDatum } from "../types/types.ts";
 
 export const openChannel = async (
@@ -27,7 +27,19 @@ export const openChannel = async (
   if (expirationDate < currentTime)
     throw new Error("Expiration date is in the past");
   lucid.selectReadOnlyWallet({ address: senderAddress });
-  const utxos = await lucid.wallet.getUtxos();
+  const selectedUtxos = await lucid.wallet.getUtxos().then((utxos) =>
+    selectUTxOs(utxos, {
+      lovelace: 20_000_000n,
+      [config.token]: initialDeposit,
+    }),
+  );
+
+  const utxos = selectedUtxos.sort((a, b) => {
+    const aLex = `${a.txHash}${a.outputIndex}`;
+    const bLex = `${b.txHash}${b.outputIndex}`;
+    if (aLex < bLex) return -1;
+    return 1;
+  });
   const utxo = utxos[0];
   const channelId: string = Buffer.from(
     utxo.txHash + Data.to<bigint>(BigInt(utxo.outputIndex)),
@@ -53,7 +65,7 @@ export const openChannel = async (
   const tx = await lucid
     .newTx()
     .readFrom([scriptRef])
-    .collectFrom([utxo])
+    .collectFrom(utxos)
     .addSigner(senderPubKeyHash)
     .mint({ [channelToken]: 1n }, Data.void())
     .payToContract(

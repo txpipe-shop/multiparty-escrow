@@ -131,7 +131,9 @@ export const testUpdateOperation = async (
   console.log(`\n
       > Channel updated with ID: ${channelId}
       > Add Deposit: ${addDeposit ?? 0}
-      > New Expiration Date: ${new Date(Number(expirationDate)) ?? "N/A"}
+      > New Expiration Date: ${
+        Number(expirationDate) ? new Date(Number(expirationDate)) : "N/A"
+      }
       > Tx ID: ${updatedTx}
       > CBOR: ${updatedChannelCbor}\n\n`);
 
