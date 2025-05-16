@@ -1,11 +1,14 @@
 import { Lucid } from "@spacebudz/lucid";
-import e from "express";
-import { OpenChannelSchema } from "../../shared/api-types.ts";
-import { openChannel } from "../../offchain/builders/open-channel.ts";
-import { logger } from "../../shared/logger.ts";
+import e, { Request, Response } from "express";
 import { z } from "zod";
-import { Request, Response } from "express";
 import { config } from "../../config.ts";
+import { openChannel } from "../../offchain/builders/open-channel.ts";
+import { updateChannel } from "../../offchain/builders/update-channel.ts";
+import {
+  OpenChannelSchema,
+  UpdateChannelSchema,
+} from "../../shared/api-types.ts";
+import { logger } from "../../shared/logger.ts";
 
 enum Routes {
   OPEN = "/open",
@@ -45,6 +48,43 @@ export const setRoutes = async (lucid: Lucid, app: e.Application) => {
       logger.info(
         `open channel request completed; channelID: ${openResult.channelId}`,
         Routes.OPEN,
+      );
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ error: error.errors });
+        logger.error(`bad request: ${error}`, Routes.OPEN);
+      } else {
+        res.status(500).json({ error: "Internal server error" });
+        logger.error(`internal server error: ${error.stack}`, Routes.OPEN);
+      }
+    }
+  });
+
+  /**
+   * Update a channel
+   */
+  app.post(Routes.UPDATE, async (req: Request, res: Response) => {
+    logger.info("handling request", Routes.UPDATE);
+    try {
+      const params = UpdateChannelSchema.parse(req.body);
+      const currentTime = BigInt(Date.now());
+      const updateResult = await updateChannel(
+        lucid,
+        params,
+        refScript,
+        currentTime,
+      );
+      res.status(200).json(updateResult);
+      logger.info(
+        `update channel request completed;
+        - Amount: ${params.addDeposit ?? 0}
+        - Expiration date: ${
+          Number(params.expirationDate)
+            ? new Date(Number(params.expirationDate))
+            : "N/A"
+        }`,
+        Routes.UPDATE,
       );
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
