@@ -16,33 +16,35 @@ import {
   validatorDetails,
 } from "../lib/utils.ts";
 
+/**
+ * Builds a transaction to claim one or more channels. This function assumes that all channels being claimed
+ * have the same receiver.
+ */
 export const claim = async (
   lucid: Lucid,
   params: ClaimChannelParams,
   scriptRef: Utxo,
   currentTime: bigint,
-  receiverAddress: string,
 ): Promise<{ claimChannelCbor: string }> => {
   const { scriptHash, scriptRewardAddress } = validatorDetails(lucid);
-  lucid.selectReadOnlyWallet({ address: receiverAddress });
 
   // Get all channel utxos
   const channels = [];
-  for (const param of params) {
+  for (const channel of params.channels) {
     try {
-      const { senderAddress, channelId } = param;
+      const { senderAddress, channelId } = channel;
       const senderPubKeyHash =
         Addresses.addressToCredential(senderAddress).hash;
       const channelToken = toUnit(scriptHash, senderPubKeyHash);
       const channelUtxo = await getChannelUtxo(lucid, channelToken, channelId);
       if (!channelUtxo) throw new Error("Channel utxo not found");
       channels.push({
-        ...param,
+        ...channel,
         utxo: channelUtxo,
         channelToken,
       });
     } catch (e) {
-      console.error(`Error getting channel UTXO for ${param.channelId}`);
+      console.error(`Error getting channel UTXO for ${channel.channelId}`);
       console.error(e);
     }
   }
@@ -115,6 +117,8 @@ export const claim = async (
       ? ["Claim single channel"]
       : ["Claim multiple channels"];
   const receiverPayout = { [config.token]: receiverAmount };
+  const receiverAddress = params.receiverAddress;
+  lucid.selectReadOnlyWallet({ address: receiverAddress });
   const txComplete = await tx
     .withdraw(scriptRewardAddress, 0n, Data.void())
     .addSigner(Addresses.addressToCredential(receiverAddress).hash)

@@ -157,7 +157,7 @@ export const testClaimOperation = async (
   }: {
     lucid: Lucid;
     scriptRef: Utxo;
-    listOfClaims: ClaimChannelParams;
+    listOfClaims: ClaimChannelParams["channels"];
     currentTime: bigint;
     receiverAddress: string;
   },
@@ -166,10 +166,9 @@ export const testClaimOperation = async (
 ) => {
   const { claimChannelCbor: claimCbor } = await claim(
     lucid,
-    listOfClaims,
+    { channels: listOfClaims, receiverAddress },
     scriptRef,
     currentTime,
-    receiverAddress,
   );
 
   lucid.selectWalletFromPrivateKey(userPrivKey);

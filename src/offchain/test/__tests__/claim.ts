@@ -56,7 +56,7 @@ describe("Single claim: happy path tests", () => {
       senderAddress: sender.address,
     });
     const signature = await signMessage(getCMLPrivateKey(signer.seed), payload);
-    const claims: ClaimChannelParams = [
+    const claims: ClaimChannelParams["channels"] = [
       {
         senderAddress: sender.address,
         channelId,
@@ -104,7 +104,7 @@ describe("Single claim: happy path tests", () => {
     );
     if (!channelToken) throw new Error("Channel token not found");
     const signature = await signMessage(getCMLPrivateKey(signer.seed), payload);
-    const claims: ClaimChannelParams = [
+    const claims: ClaimChannelParams["channels"] = [
       {
         senderAddress: sender.address,
         channelId,
@@ -113,7 +113,6 @@ describe("Single claim: happy path tests", () => {
         finalize: true,
       },
     ];
-
     const { claimTx } = await testClaimOperation(
       {
         lucid,
@@ -175,7 +174,7 @@ describe("Multiple claims: happy path tests", () => {
     });
     const signature = await signMessage(getCMLPrivateKey(signer.seed), p1);
     const signature2 = await signMessage(getCMLPrivateKey(signer.seed), p2);
-    const claims: ClaimChannelParams = [
+    const claims: ClaimChannelParams["channels"] = [
       {
         senderAddress: sender.address,
         channelId: in1Datum.channelId,
@@ -246,7 +245,7 @@ describe("Attack tests", () => {
         getCMLPrivateKey(signer.seed),
         payload,
       );
-      const claims: ClaimChannelParams = [
+      const claims: ClaimChannelParams["channels"] = [
         {
           senderAddress: sender.address,
           channelId,

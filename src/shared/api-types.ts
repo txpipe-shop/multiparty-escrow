@@ -118,15 +118,18 @@ export const UpdateChannelSchema = z.object({
   expirationDate: z.bigint().optional(),
 });
 
-export const ClaimChannelSchema = z.array(
-  z.object({
-    senderAddress: addressSchema,
-    channelId: OutRef,
-    amount: z.bigint(),
-    signature: z.string(),
-    finalize: z.boolean(),
-  }),
-);
+export const ClaimChannelSchema = z.object({
+  channels: z.array(
+    z.object({
+      senderAddress: addressSchema,
+      channelId: OutRef,
+      amount: z.bigint(),
+      signature: z.string(),
+      finalize: z.boolean(),
+    }),
+  ),
+  receiverAddress: addressSchema,
+});
 
 export const CloseChannelSchema = z.object({
   senderAddress: addressSchema,

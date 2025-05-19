@@ -7,11 +7,13 @@ import { openChannel } from "../../offchain/builders/open-channel.ts";
 import { updateChannel } from "../../offchain/builders/update-channel.ts";
 import {
   CloseChannelSchema,
+  ClaimChannelSchema,
   OpenChannelSchema,
   UpdateChannelSchema,
 } from "../../shared/api-types.ts";
 import { logger } from "../../shared/logger.ts";
 import { getErrorString } from "../utils.ts";
+import { claim } from "../../offchain/builders/claim.ts";
 
 enum Routes {
   OPEN = "/open",
@@ -89,7 +91,6 @@ export const setRoutes = async (lucid: Lucid, app: e.Application) => {
         }`,
         Routes.UPDATE
       );
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       if (error instanceof z.ZodError) {
         res.status(400).json({ error: error.errors });

@@ -118,7 +118,7 @@ const actions: Record<ActionKey, () => Promise<void>> = {
   5: async () => {
     console.log("\n[Claiming channels]");
     let claimAction = 0;
-    let listOfClaims: ClaimChannelParams = [];
+    let listOfClaims: ClaimChannelParams["channels"] = [];
     while (claimAction !== 2) {
       console.log(
         "\nOPTIONS:\n1: Add a channel to claim\n2: Claim added channels",
