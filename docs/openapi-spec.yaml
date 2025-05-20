@@ -177,6 +177,7 @@ paths:
       summary: Get all channels
       description: |
         Example `curl` command:
+
         ```bash
         curl http://localhost:3000/channels
       responses:
