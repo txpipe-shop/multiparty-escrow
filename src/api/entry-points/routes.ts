@@ -5,6 +5,7 @@ import { config } from "../../config.ts";
 import { closeChannel } from "../../offchain/builders/close-channel.ts";
 import { openChannel } from "../../offchain/builders/open-channel.ts";
 import { updateChannel } from "../../offchain/builders/update-channel.ts";
+import { getAllChannels } from "../../offchain/queries/all-channels.ts";
 import {
   CloseChannelSchema,
   ClaimChannelSchema,
@@ -12,7 +13,7 @@ import {
   UpdateChannelSchema,
 } from "../../shared/api-types.ts";
 import { logger } from "../../shared/logger.ts";
-import { getErrorString } from "../utils.ts";
+import { getErrorString, serializedResult } from "../utils.ts";
 import { claim } from "../../offchain/builders/claim.ts";
 
 enum Routes {
@@ -45,12 +46,12 @@ export const setRoutes = async (lucid: Lucid, app: e.Application) => {
         lucid,
         params,
         refScript,
-        currentTime,
+        currentTime
       );
       res.status(200).json(openResult);
       logger.info(
         `open channel request completed; channelID: ${openResult.channelId}`,
-        Routes.OPEN,
+        Routes.OPEN
       );
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
@@ -78,7 +79,7 @@ export const setRoutes = async (lucid: Lucid, app: e.Application) => {
         lucid,
         params,
         refScript,
-        currentTime,
+        currentTime
       );
       res.status(200).json(updateResult);
       logger.info(
@@ -89,7 +90,7 @@ export const setRoutes = async (lucid: Lucid, app: e.Application) => {
             ? new Date(Number(params.expirationDate))
             : "N/A"
         }`,
-        Routes.UPDATE,
+        Routes.UPDATE
       );
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
@@ -142,12 +143,12 @@ export const setRoutes = async (lucid: Lucid, app: e.Application) => {
         lucid,
         params,
         refScript,
-        currentTime,
+        currentTime
       );
       res.status(200).json(closeResult);
       logger.info(
         `closed channel; channelID: ${params.channelId}}`,
-        Routes.CLOSE,
+        Routes.CLOSE
       );
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
@@ -159,6 +160,30 @@ export const setRoutes = async (lucid: Lucid, app: e.Application) => {
           error: `${getErrorString(error.stack)}`,
         });
         logger.error(`internal server error: ${error.stack}`, Routes.CLOSE);
+      }
+    }
+  });
+
+  /**
+   * Get all channels
+   */
+  app.get(Routes.ALL_CHANNELS, async (_req: Request, res: Response) => {
+    logger.info("handling request", Routes.ALL_CHANNELS);
+    try {
+      const allChannelsRes = await getAllChannels(lucid);
+      res.status(200).json(serializedResult(allChannelsRes));
+      logger.info(`found every channel;`, Routes.ALL_CHANNELS);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ error: error.errors });
+        logger.error(`bad request: ${error}`, Routes.ALL_CHANNELS);
+      } else {
+        res.status(500).json({ error: "Internal server error" });
+        logger.error(
+          `internal server error: ${error.stack}`,
+          Routes.ALL_CHANNELS
+        );
       }
     }
   });
