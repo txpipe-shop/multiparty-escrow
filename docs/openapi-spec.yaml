@@ -7,6 +7,20 @@ paths:
   /open:
     post:
       summary: Open a new channel
+      description: |
+       Example `curl` command:
+        ```bash
+        curl -X POST http://localhost:3001/open \
+          -H "Content-Type: application/json" \
+          -d '{
+            "senderAddress": "addr_test1qz6fcx7lay9czf838z4m0ppkyzzgspp9kz5uwede3ry4fmxmkhwgrz8c7pyr8dmqvcmf7sa2dagvvtfmw5585w847jgqwrhsv8",
+            "signerPubKey": "827FF8BEEEA147E7FA287DC5271E84049A0B6724BF47F66BC3748E469B210142",
+            "receiverAddress": "addr_test1qz6fcx7lay9czf838z4m0ppkyzzgspp9kz5uwede3ry4fmxmkhwgrz8c7pyr8dmqvcmf7sa2dagvvtfmw5585w847jgqwrhsv8",
+            "initialDeposit": 10000000000,
+            "expirationDate": 1715800000000000,
+            "groupId": "group-42"
+          }'
+        ```
       requestBody:
         required: true
         content:
