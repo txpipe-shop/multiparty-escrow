@@ -2,6 +2,7 @@ import { Lucid } from "@spacebudz/lucid";
 import e, { Request, Response } from "express";
 import { z } from "zod";
 import { config } from "../../config.ts";
+import { claim } from "../../offchain/builders/claim.ts";
 import { closeChannel } from "../../offchain/builders/close-channel.ts";
 import { openChannel } from "../../offchain/builders/open-channel.ts";
 import { updateChannel } from "../../offchain/builders/update-channel.ts";
@@ -20,7 +21,6 @@ import {
 } from "../../shared/api-types.ts";
 import { logger } from "../../shared/logger.ts";
 import { getErrorString, serializedResult } from "../utils.ts";
-import { claim } from "../../offchain/builders/claim.ts";
 
 enum Routes {
   OPEN = "/open",
@@ -52,12 +52,12 @@ export const setRoutes = async (lucid: Lucid, app: e.Application) => {
         lucid,
         params,
         refScript,
-        currentTime,
+        currentTime
       );
       res.status(200).json(openResult);
       logger.info(
         `open channel request completed; channelID: ${openResult.channelId}`,
-        Routes.OPEN,
+        Routes.OPEN
       );
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
@@ -83,7 +83,7 @@ export const setRoutes = async (lucid: Lucid, app: e.Application) => {
         lucid,
         params,
         refScript,
-        currentTime,
+        currentTime
       );
       res.status(200).json(updateResult);
       logger.info(
@@ -94,7 +94,7 @@ export const setRoutes = async (lucid: Lucid, app: e.Application) => {
             ? new Date(Number(params.expirationDate))
             : "N/A"
         }`,
-        Routes.UPDATE,
+        Routes.UPDATE
       );
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
@@ -145,12 +145,12 @@ export const setRoutes = async (lucid: Lucid, app: e.Application) => {
         lucid,
         params,
         refScript,
-        currentTime,
+        currentTime
       );
       res.status(200).json(closeResult);
       logger.info(
         `closed channel; channelID: ${params.channelId}}`,
-        Routes.CLOSE,
+        Routes.CLOSE
       );
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
@@ -182,7 +182,7 @@ export const setRoutes = async (lucid: Lucid, app: e.Application) => {
         res.status(500).json({ error: `${getErrorString(error.stack)}` });
         logger.error(
           `internal server error: ${error.stack}`,
-          Routes.ALL_CHANNELS,
+          Routes.ALL_CHANNELS
         );
       }
     }
@@ -207,7 +207,7 @@ export const setRoutes = async (lucid: Lucid, app: e.Application) => {
         res.status(500).json({ error: `${getErrorString(error.stack)}` });
         logger.error(
           `internal server error: ${error.stack}`,
-          Routes.CHANNEL_WITH_ID,
+          Routes.CHANNEL_WITH_ID
         );
       }
     }
@@ -222,12 +222,12 @@ export const setRoutes = async (lucid: Lucid, app: e.Application) => {
       const { senderAddress } = GetChannelsFromSender.parse(req.query);
       const channelsFromSender = await getChannelsFromSender(
         lucid,
-        senderAddress,
+        senderAddress
       );
       res.status(200).json(serializedResult(channelsFromSender));
       logger.info(
         `channel from sender with address ${senderAddress} found`,
-        Routes.CHANNELS_FROM_SENDER,
+        Routes.CHANNELS_FROM_SENDER
       );
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
@@ -238,7 +238,7 @@ export const setRoutes = async (lucid: Lucid, app: e.Application) => {
         res.status(500).json({ error: `${getErrorString(error.stack)}` });
         logger.error(
           `internal server error: ${error.stack}`,
-          Routes.CHANNELS_FROM_SENDER,
+          Routes.CHANNELS_FROM_SENDER
         );
       }
     }
@@ -255,12 +255,12 @@ export const setRoutes = async (lucid: Lucid, app: e.Application) => {
         const { receiverAddress } = GetChannelsFromReceiver.parse(req.query);
         const channelsFromSender = await getChannelsFromReceiver(
           lucid,
-          receiverAddress,
+          receiverAddress
         );
         res.status(200).json(serializedResult(channelsFromSender));
         logger.info(
           `channel from receiver with address ${receiverAddress} found`,
-          Routes.CHANNELS_FROM_RECEIVER,
+          Routes.CHANNELS_FROM_RECEIVER
         );
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
@@ -271,10 +271,10 @@ export const setRoutes = async (lucid: Lucid, app: e.Application) => {
           res.status(500).json({ error: `${getErrorString(error.stack)}` });
           logger.error(
             `internal server error: ${error.stack}`,
-            Routes.CHANNELS_FROM_RECEIVER,
+            Routes.CHANNELS_FROM_RECEIVER
           );
         }
       }
-    },
+    }
   );
 };
