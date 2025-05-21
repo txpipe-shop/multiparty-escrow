@@ -57,9 +57,7 @@ export const setRoutes = async (lucid: Lucid, app: e.Application) => {
         res.status(400).json({ error: error.errors });
         logger.error(`bad request: ${error}`, Routes.OPEN);
       } else {
-        res.status(500).json({
-          error: `${getErrorString(error.stack)}`,
-        });
+        res.status(500).json({ error: `${getErrorString(error.stack)}` });
         logger.error(`internal server error: ${error.stack}`, Routes.OPEN);
       }
     }
@@ -96,9 +94,7 @@ export const setRoutes = async (lucid: Lucid, app: e.Application) => {
         res.status(400).json({ error: error.errors });
         logger.error(`bad request: ${error}`, Routes.UPDATE);
       } else {
-        res.status(500).json({
-          error: `${getErrorString(error.stack)}`,
-        });
+        res.status(500).json({ error: `${getErrorString(error.stack)}` });
         logger.error(`internal server error: ${error.stack}`, Routes.UPDATE);
       }
     }
@@ -129,9 +125,7 @@ export const setRoutes = async (lucid: Lucid, app: e.Application) => {
         res.status(400).json({ error: error.errors });
         logger.error(`bad request: ${error}`, Routes.CLOSE);
       } else {
-        res.status(500).json({
-          error: `${getErrorString(error.stack)}`,
-        });
+        res.status(500).json({ error: `${getErrorString(error.stack)}` });
         logger.error(`internal server error: ${error.stack}`, Routes.CLOSE);
       }
     }
@@ -152,7 +146,7 @@ export const setRoutes = async (lucid: Lucid, app: e.Application) => {
         res.status(400).json({ error: error.errors });
         logger.error(`bad request: ${error}`, Routes.ALL_CHANNELS);
       } else {
-        res.status(500).json({ error: "Internal server error" });
+        res.status(500).json({ error: `${getErrorString(error.stack)}` });
         logger.error(
           `internal server error: ${error.stack}`,
           Routes.ALL_CHANNELS,
