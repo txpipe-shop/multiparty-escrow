@@ -142,9 +142,15 @@ export const BuildMessageSchema = z.object({
   amount: z.bigint(),
 });
 
+export const GetChannelsByIDSchema = z.object({
+  channelId: OutRef,
+});
+
 export type channelIdType = z.infer<typeof OutRef>;
 export type OpenChannelParams = z.infer<typeof OpenChannelSchema>;
 export type UpdateChannelParams = z.infer<typeof UpdateChannelSchema>;
 export type ClaimChannelParams = z.infer<typeof ClaimChannelSchema>;
 export type CloseChannelParams = z.infer<typeof CloseChannelSchema>;
 export type BuildMessageParams = z.infer<typeof BuildMessageSchema>;
+
+export type GetChannelsByIDParams = z.infer<typeof GetChannelsByIDSchema>;

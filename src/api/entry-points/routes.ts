@@ -6,9 +6,11 @@ import { closeChannel } from "../../offchain/builders/close-channel.ts";
 import { openChannel } from "../../offchain/builders/open-channel.ts";
 import { updateChannel } from "../../offchain/builders/update-channel.ts";
 import { getAllChannels } from "../../offchain/queries/all-channels.ts";
+import { getChannelById } from "../../offchain/queries/channel-by-id.ts";
 import {
   CloseChannelSchema,
   ClaimChannelSchema,
+  GetChannelsByIDSchema,
   OpenChannelSchema,
   UpdateChannelSchema,
 } from "../../shared/api-types.ts";
@@ -177,6 +179,31 @@ export const setRoutes = async (lucid: Lucid, app: e.Application) => {
         logger.error(
           `internal server error: ${error.stack}`,
           Routes.ALL_CHANNELS
+        );
+      }
+    }
+  });
+
+  /**
+   * Get channel by ID
+   */
+  app.get(Routes.CHANNEL_WITH_ID, async (req: Request, res: Response) => {
+    logger.info("handling request", Routes.CHANNEL_WITH_ID);
+    try {
+      const { channelId } = GetChannelsByIDSchema.parse(req.query);
+      const channelsWithId = await getChannelById(lucid, channelId);
+      res.status(200).json(serializedResult([channelsWithId]));
+      logger.info(`channel found;`, Routes.CHANNEL_WITH_ID);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ error: error.errors });
+        logger.error(`bad request: ${error}`, Routes.CHANNEL_WITH_ID);
+      } else {
+        res.status(500).json({ error: "Internal server error" });
+        logger.error(
+          `internal server error: ${error.stack}`,
+          Routes.CHANNEL_WITH_ID
         );
       }
     }
