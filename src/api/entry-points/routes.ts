@@ -5,13 +5,16 @@ import { config } from "../../config.ts";
 import { closeChannel } from "../../offchain/builders/close-channel.ts";
 import { openChannel } from "../../offchain/builders/open-channel.ts";
 import { updateChannel } from "../../offchain/builders/update-channel.ts";
+import { getAllChannels } from "../../offchain/queries/all-channels.ts";
+import { getChannelById } from "../../offchain/queries/channel-by-id.ts";
 import {
   CloseChannelSchema,
+  GetChannelsByIDSchema,
   OpenChannelSchema,
   UpdateChannelSchema,
 } from "../../shared/api-types.ts";
 import { logger } from "../../shared/logger.ts";
-import { getErrorString } from "../utils.ts";
+import { getErrorString, serializedResult } from "../utils.ts";
 
 enum Routes {
   OPEN = "/open",
@@ -56,9 +59,7 @@ export const setRoutes = async (lucid: Lucid, app: e.Application) => {
         res.status(400).json({ error: error.errors });
         logger.error(`bad request: ${error}`, Routes.OPEN);
       } else {
-        res.status(500).json({
-          error: `${getErrorString(error.stack)}`,
-        });
+        res.status(500).json({ error: `${getErrorString(error.stack)}` });
         logger.error(`internal server error: ${error.stack}`, Routes.OPEN);
       }
     }
@@ -95,9 +96,7 @@ export const setRoutes = async (lucid: Lucid, app: e.Application) => {
         res.status(400).json({ error: error.errors });
         logger.error(`bad request: ${error}`, Routes.UPDATE);
       } else {
-        res.status(500).json({
-          error: `${getErrorString(error.stack)}`,
-        });
+        res.status(500).json({ error: `${getErrorString(error.stack)}` });
         logger.error(`internal server error: ${error.stack}`, Routes.UPDATE);
       }
     }
@@ -128,10 +127,57 @@ export const setRoutes = async (lucid: Lucid, app: e.Application) => {
         res.status(400).json({ error: error.errors });
         logger.error(`bad request: ${error}`, Routes.CLOSE);
       } else {
-        res.status(500).json({
-          error: `${getErrorString(error.stack)}`,
-        });
+        res.status(500).json({ error: `${getErrorString(error.stack)}` });
         logger.error(`internal server error: ${error.stack}`, Routes.CLOSE);
+      }
+    }
+  });
+
+  /**
+   * Get all channels
+   */
+  app.get(Routes.ALL_CHANNELS, async (_req: Request, res: Response) => {
+    logger.info("handling request", Routes.ALL_CHANNELS);
+    try {
+      const allChannelsRes = await getAllChannels(lucid);
+      res.status(200).json(serializedResult(allChannelsRes));
+      logger.info(`found every channel`, Routes.ALL_CHANNELS);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ error: error.errors });
+        logger.error(`bad request: ${error}`, Routes.ALL_CHANNELS);
+      } else {
+        res.status(500).json({ error: `${getErrorString(error.stack)}` });
+        logger.error(
+          `internal server error: ${error.stack}`,
+          Routes.ALL_CHANNELS,
+        );
+      }
+    }
+  });
+
+  /**
+   * Get channel by ID
+   */
+  app.get(Routes.CHANNEL_WITH_ID, async (req: Request, res: Response) => {
+    logger.info("handling request", Routes.CHANNEL_WITH_ID);
+    try {
+      const { channelId } = GetChannelsByIDSchema.parse(req.query);
+      const channelsWithId = await getChannelById(lucid, channelId);
+      res.status(200).json(serializedResult([channelsWithId]));
+      logger.info(`channel found`, Routes.CHANNEL_WITH_ID);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ error: error.errors });
+        logger.error(`bad request: ${error}`, Routes.CHANNEL_WITH_ID);
+      } else {
+        res.status(500).json({ error: `${getErrorString(error.stack)}` });
+        logger.error(
+          `internal server error: ${error.stack}`,
+          Routes.CHANNEL_WITH_ID,
+        );
       }
     }
   });
