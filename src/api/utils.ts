@@ -13,7 +13,7 @@ export const serializedResult = (result: ChannelInfo[]) =>
   result.map((item) =>
     JSON.parse(
       JSON.stringify(item, (_, value) =>
-        typeof value === "bigint" ? value.toString() : value
-      )
-    )
+        typeof value === "bigint" ? value.toString() : value,
+      ),
+    ),
   );
