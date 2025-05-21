@@ -8,25 +8,25 @@ paths:
     post:
       summary: Open a new channel
       description: |
-       Example `curl` command:
-        ```bash
-        curl -X POST http://localhost:3001/open \
-          -H "Content-Type: application/json" \
-          -d '{
-            "senderAddress": "addr_test1qz6fcx7lay9czf838z4m0ppkyzzgspp9kz5uwede3ry4fmxmkhwgrz8c7pyr8dmqvcmf7sa2dagvvtfmw5585w847jgqwrhsv8",
-            "signerPubKey": "827FF8BEEEA147E7FA287DC5271E84049A0B6724BF47F66BC3748E469B210142",
-            "receiverAddress": "addr_test1qz6fcx7lay9czf838z4m0ppkyzzgspp9kz5uwede3ry4fmxmkhwgrz8c7pyr8dmqvcmf7sa2dagvvtfmw5585w847jgqwrhsv8",
-            "initialDeposit": 10000000000,
-            "expirationDate": 1715800000000000,
-            "groupId": "group-42"
-          }'
-        ```
+        Example `curl` command:
+         ```bash
+         curl -X POST http://localhost:3001/open \
+           -H "Content-Type: application/json" \
+           -d '{
+             "senderAddress": "addr_test1qz6fcx7lay9czf838z4m0ppkyzzgspp9kz5uwede3ry4fmxmkhwgrz8c7pyr8dmqvcmf7sa2dagvvtfmw5585w847jgqwrhsv8",
+             "signerPubKey": "827FF8BEEEA147E7FA287DC5271E84049A0B6724BF47F66BC3748E469B210142",
+             "receiverAddress": "addr_test1qz6fcx7lay9czf838z4m0ppkyzzgspp9kz5uwede3ry4fmxmkhwgrz8c7pyr8dmqvcmf7sa2dagvvtfmw5585w847jgqwrhsv8",
+             "initialDeposit": 10000000000,
+             "expirationDate": 1715800000000000,
+             "groupId": "group-42"
+           }'
+         ```
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/OpenChannelParams'
+              $ref: "#/components/schemas/OpenChannelParams"
             example:
               senderAddress: "addr_test1vzwlx094fypzcfsz53n5gufc6h84tawp9pdyklm05pr385gl956ej"
               signerPubKey: "145562a792f2ca28ae87f1f7afd25b126f76547103204f62432999bcc2b5c542"
@@ -71,7 +71,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateChannelParams'
+              $ref: "#/components/schemas/UpdateChannelParams"
             example:
               channelId: "b126f76547103204f62432999bcc2b5cb126f76547103204f62432999bcc2b5c0"
               addDeposit: "500000"
@@ -92,7 +92,26 @@ paths:
                 updateChannelCbor: "84a400d9..."
   /claim:
     post:
-      summary: Claim funds from a channel
+      summary: Claim funds from one or more channels
+      description: |
+        Example `curl` command:
+
+        ```bash
+        curl -X POST http://localhost:3001/claim \
+          -H "Content-Type: application/json" \
+          -d '{
+            "channels": [
+              {
+                "senderAddress": "addr_test1qz6fcx7lay9czf838z4m0ppkyzzgspp9kz5uwede3ry4fmxmkhwgrz8c7pyr8dmqvcmf7sa2dagvvtfmw5585w847jgqwrhsv8",
+                "channelId": "212b0cc03a26d634032dca7fcafba24d4fee4f912c25a59586c1dcfd1902ee6302",
+                "amount": 200,
+                "signature": "9c69251807c646c4f3d827f76e74760db23d57f69420c2167d6cf61b79b8ae798cfb5b2a65272bacd84d50a8c261edd7c02c8f11726dfb0461a0c59d4bef0402",
+                "finalize": false
+              }
+            ],
+            "receiverAddress": "addr_test1qz6fcx7lay9czf838z4m0ppkyzzgspp9kz5uwede3ry4fmxmkhwgrz8c7pyr8dmqvcmf7sa2dagvvtfmw5585w847jgqwrhsv8"
+          }'
+        ```
       requestBody:
         required: true
         content:
@@ -100,7 +119,7 @@ paths:
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/ClaimParams'
+                $ref: "#/components/schemas/ClaimParams"
             example:
               - channelId: "b126f76547103204f62432999bcc2b5cb126f76547103204f62432999bcc2b5c0"
                 signature: "4eb27d97d08c53f4d5d53aabd395e7eaa3a095ac084db3201974146804e1bde1"
@@ -137,7 +156,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ClaimParams'
+              $ref: "#/components/schemas/ClaimParams"
             example:
               channelId: "b126f76547103204f62432999bcc2b5cb126f76547103204f62432999bcc2b5c0"
               senderAddress: "addr_test1vzwlx094fypzcfsz53n5gufc6h84tawp9pdyklm05pr385gl956ej"
@@ -164,7 +183,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Channel'
+                  $ref: "#/components/schemas/Channel"
   /channel-with-id:
     get:
       summary: Get a channel by channelId
@@ -180,7 +199,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Channel'
+                $ref: "#/components/schemas/Channel"
   /channels-from-sender:
     get:
       summary: Get channels by sender
@@ -198,7 +217,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Channel'
+                  $ref: "#/components/schemas/Channel"
   /channels-from-receiver:
     get:
       summary: Get channels by receiver
@@ -216,7 +235,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Channel'
+                  $ref: "#/components/schemas/Channel"
 components:
   schemas:
     OpenChannelParams:
