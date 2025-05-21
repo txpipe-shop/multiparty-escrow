@@ -126,7 +126,7 @@ export const ClaimChannelSchema = z.object({
       amount: z.bigint(),
       signature: z.string(),
       finalize: z.boolean(),
-    }),
+    })
   ),
   receiverAddress: addressSchema,
 });
