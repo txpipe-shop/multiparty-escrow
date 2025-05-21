@@ -45,12 +45,12 @@ export const setRoutes = async (lucid: Lucid, app: e.Application) => {
         lucid,
         params,
         refScript,
-        currentTime
+        currentTime,
       );
       res.status(200).json(openResult);
       logger.info(
         `open channel request completed; channelID: ${openResult.channelId}`,
-        Routes.OPEN
+        Routes.OPEN,
       );
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
@@ -78,7 +78,7 @@ export const setRoutes = async (lucid: Lucid, app: e.Application) => {
         lucid,
         params,
         refScript,
-        currentTime
+        currentTime,
       );
       res.status(200).json(updateResult);
       logger.info(
@@ -89,7 +89,7 @@ export const setRoutes = async (lucid: Lucid, app: e.Application) => {
             ? new Date(Number(params.expirationDate))
             : "N/A"
         }`,
-        Routes.UPDATE
+        Routes.UPDATE,
       );
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
@@ -124,7 +124,8 @@ export const setRoutes = async (lucid: Lucid, app: e.Application) => {
       } else {
         res.status(500).json({
           error: `${getErrorString(error.stack)}`,
-        });        logger.error(`internal server error: ${error.stack}`, Routes.CLAIM);
+        });
+        logger.error(`internal server error: ${error.stack}`, Routes.CLAIM);
       }
     }
   });
@@ -141,12 +142,12 @@ export const setRoutes = async (lucid: Lucid, app: e.Application) => {
         lucid,
         params,
         refScript,
-        currentTime
+        currentTime,
       );
       res.status(200).json(closeResult);
       logger.info(
         `closed channel; channelID: ${params.channelId}}`,
-        Routes.CLOSE
+        Routes.CLOSE,
       );
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
