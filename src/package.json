@@ -17,7 +17,8 @@
     "test-multi-claim": "tsx --experimental-wasm-modules --experimental-specifier-resolution=node ./offchain/test/multi-claim.ts",
     "test-all": "tsx --experimental-wasm-modules --experimental-specifier-resolution=node ./offchain/test/combined-operations.ts",
     "cli-preview": "tsx --experimental-wasm-modules --experimental-specifier-resolution=node ./offchain/test/testnet.ts",
-    "deploy": "tsx --experimental-wasm-modules --experimental-specifier-resolution=node ./offchain/test/deploy.ts"
+    "deploy": "tsx --experimental-wasm-modules --experimental-specifier-resolution=node ./offchain/test/deploy.ts",
+    "sign": "tsx --experimental-wasm-modules --experimental-specifier-resolution=node ./offchain/test/sign-msg.ts"
   },
   "author": "",
   "license": "ISC",
