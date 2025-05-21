@@ -200,7 +200,7 @@ export const setRoutes = async (lucid: Lucid, app: e.Application) => {
         res.status(400).json({ error: error.errors });
         logger.error(`bad request: ${error}`, Routes.CHANNEL_WITH_ID);
       } else {
-        res.status(500).json({ error: "Internal server error" });
+        res.status(500).json({ error: `${getErrorString(error.stack)}` });
         logger.error(
           `internal server error: ${error.stack}`,
           Routes.CHANNEL_WITH_ID
