@@ -166,7 +166,7 @@ export const setRoutes = async (lucid: Lucid, app: e.Application) => {
     try {
       const allChannelsRes = await getAllChannels(lucid);
       res.status(200).json(serializedResult(allChannelsRes));
-      logger.info(`found every channel;`, Routes.ALL_CHANNELS);
+      logger.info(`found every channel`, Routes.ALL_CHANNELS);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       if (error instanceof z.ZodError) {
