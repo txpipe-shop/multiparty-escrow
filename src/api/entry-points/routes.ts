@@ -45,12 +45,12 @@ export const setRoutes = async (lucid: Lucid, app: e.Application) => {
         lucid,
         params,
         refScript,
-        currentTime,
+        currentTime
       );
       res.status(200).json(openResult);
       logger.info(
         `open channel request completed; channelID: ${openResult.channelId}`,
-        Routes.OPEN,
+        Routes.OPEN
       );
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
@@ -78,7 +78,7 @@ export const setRoutes = async (lucid: Lucid, app: e.Application) => {
         lucid,
         params,
         refScript,
-        currentTime,
+        currentTime
       );
       res.status(200).json(updateResult);
       logger.info(
@@ -89,7 +89,7 @@ export const setRoutes = async (lucid: Lucid, app: e.Application) => {
             ? new Date(Number(params.expirationDate))
             : "N/A"
         }`,
-        Routes.UPDATE,
+        Routes.UPDATE
       );
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
@@ -106,6 +106,30 @@ export const setRoutes = async (lucid: Lucid, app: e.Application) => {
   });
 
   /**
+   *  Claim one or more channels.
+   */
+  app.post(Routes.CLAIM, async (req: Request, res: Response) => {
+    logger.info("handling request", Routes.CLAIM);
+    try {
+      const params = ClaimChannelSchema.parse(req.body);
+      const currentTime = BigInt(Date.now());
+      const claimResult = await claim(lucid, params, refScript, currentTime);
+      res.status(200).json(claimResult);
+      logger.info(`claim channel request completed.`, Routes.CLAIM);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ error: error.errors });
+        logger.error(`bad request: ${error}`, Routes.CLAIM);
+      } else {
+        res.status(500).json({
+          error: `${getErrorString(error.stack)}`,
+        });        logger.error(`internal server error: ${error.stack}`, Routes.CLAIM);
+      }
+    }
+  });
+
+  /**
    * Close a channel
    */
   app.post(Routes.CLOSE, async (req: Request, res: Response) => {
@@ -117,12 +141,12 @@ export const setRoutes = async (lucid: Lucid, app: e.Application) => {
         lucid,
         params,
         refScript,
-        currentTime,
+        currentTime
       );
       res.status(200).json(closeResult);
       logger.info(
         `closed channel; channelID: ${params.channelId}}`,
-        Routes.CLOSE,
+        Routes.CLOSE
       );
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
