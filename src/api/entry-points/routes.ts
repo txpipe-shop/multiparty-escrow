@@ -9,8 +9,8 @@ import { getAllChannels } from "../../offchain/queries/all-channels.ts";
 import { getChannelById } from "../../offchain/queries/channel-by-id.ts";
 import { getChannelsFromSender } from "../../offchain/queries/channels-from-sender.ts";
 import {
-  CloseChannelSchema,
   ClaimChannelSchema,
+  CloseChannelSchema,
   GetChannelsByIDSchema,
   GetChannelsFromSender,
   OpenChannelSchema,
