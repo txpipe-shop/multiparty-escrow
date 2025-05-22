@@ -156,6 +156,10 @@ paths:
   /channels:
     get:
       summary: Get all channels
+      description: |
+        Example `curl` command:
+        ```bash
+        curl http://localhost:3000/channels
       responses:
         "200":
           description: List of all channels
@@ -168,6 +172,11 @@ paths:
   /channel-with-id:
     get:
       summary: Get a channel by channelId
+      description: |
+        Example `curl` command:
+
+        ```bash
+        curl http://localhost:3000/channels-with-id\?channelId\="b126f76547103204f62432999bcc2b5cb126f76547103204f62432999bcc2b5c0"
       parameters:
         - name: channelId
           in: query
@@ -184,6 +193,11 @@ paths:
   /channels-from-sender:
     get:
       summary: Get channels by sender
+      description: |
+        Example `curl` command:
+
+        ```bash
+        curl http://localhost:3000/channels-from-sender\?senderAddress\=addr_test1qz6fcx7lay9czf838z4m0ppkyzzgspp9kz5uwede3ry4fmxmkhwgrz8c7pyr8dmqvcmf7sa2dagvvtfmw5585w847jgqwrhsv8
       parameters:
         - name: senderAddress
           in: query
