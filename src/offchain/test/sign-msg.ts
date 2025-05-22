@@ -4,9 +4,7 @@ import { env } from "../../config.ts";
 import assert from "assert";
 
 const args = process.argv.slice(2);
-let nonce: bigint = 0n;
-let channelId: string = "";
-let amount: bigint = 0n;
+let nonce, channelId, amount;
 
 for (let i = 0; i < args.length; i++) {
   switch (args[i]) {
@@ -30,7 +28,7 @@ for (let i = 0; i < args.length; i++) {
 
 assert(
   channelId !== undefined && nonce !== undefined && amount !== undefined,
-  "USAGE: npm run sign -- -c <channelId> -n <nonce> -a <amount>",
+  "USAGE: npm run sign -- -c <channelId> -n <nonce> -a <amount>"
 );
 
 console.log(
@@ -38,7 +36,7 @@ console.log(
     getCMLPrivateKey(env.SEED as string),
     Data.to(
       [nonce, channelId, amount] as [bigint, string, bigint],
-      Data.Tuple([Data.Integer(), Data.Bytes(), Data.Integer()]),
-    ),
-  ),
+      Data.Tuple([Data.Integer(), Data.Bytes(), Data.Integer()])
+    )
+  )
 );
