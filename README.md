@@ -29,6 +29,12 @@ Where CONFIG_FILE is the name of a file inside the project, with the following f
 }
 ```
 
+Some scripts that run on test networks rely on a 24-word mnemonic which must be set on a `.test-env` file at src:
+```js
+SEED ="soda water ..."
+```
+Note: For safety, always use a mnemonic intended only for testing. Never use real or production mnemonics.
+
 ## Run Instructions
 
 ### Server
@@ -94,7 +100,7 @@ First, a channel is created with an initial deposit of 6 tokens. Then, an update
 ```
 
 ### Test with testnet
-To emulate this operations on preview, complete the  `.env` file at the src with:
+To emulate this operations on testnet, complete the  `.test-env` file at the src with:
 ```js
 SEED="decrease cash kangaroo ..."
 ```
