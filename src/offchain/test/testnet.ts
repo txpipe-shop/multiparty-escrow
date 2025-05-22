@@ -1,6 +1,6 @@
 import { Blockfrost, Crypto, Lucid } from "@spacebudz/lucid";
 import promptSync from "prompt-sync";
-import { env } from "../../config.ts";
+import { env, testEnv } from "../../config.ts";
 import { ClaimChannelParams } from "../../shared/api-types.ts";
 import { buildMessage } from "../builders/build-message.ts";
 import { getChannelById } from "../queries/channel-by-id.ts";
@@ -28,8 +28,8 @@ const lucid = new Lucid({
   ),
 });
 
-const seed = env.SEED;
-if (!seed) throw Error("Unable to read wallet's seed from env");
+const seed = testEnv.SEED;
+if (!seed) throw Error("Unable to read wallet's seed from .test-env");
 lucid.selectWalletFromSeed(seed);
 const { privateKey, publicKey } = Crypto.seedToDetails(seed, 0, "Payment");
 const address = await lucid.wallet.address();
