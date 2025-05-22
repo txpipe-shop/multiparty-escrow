@@ -147,6 +147,10 @@ export const GetChannelsFromSender = z.object({
   senderAddress: addressSchema,
 });
 
+export const GetChannelsFromReceiver = z.object({
+  receiverAddress: addressSchema,
+});
+
 export type channelIdType = z.infer<typeof OutRef>;
 export type OpenChannelParams = z.infer<typeof OpenChannelSchema>;
 export type UpdateChannelParams = z.infer<typeof UpdateChannelSchema>;
@@ -156,3 +160,6 @@ export type BuildMessageParams = z.infer<typeof BuildMessageSchema>;
 
 export type GetChannelsByIDParams = z.infer<typeof GetChannelsByIDSchema>;
 export type GetChannelsFromSenderParams = z.infer<typeof GetChannelsFromSender>;
+export type GetChannelsFromReceiverParams = z.infer<
+  typeof GetChannelsFromReceiver
+>;
