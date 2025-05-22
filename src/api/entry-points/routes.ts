@@ -7,10 +7,12 @@ import { openChannel } from "../../offchain/builders/open-channel.ts";
 import { updateChannel } from "../../offchain/builders/update-channel.ts";
 import { getAllChannels } from "../../offchain/queries/all-channels.ts";
 import { getChannelById } from "../../offchain/queries/channel-by-id.ts";
+import { getChannelsFromSender } from "../../offchain/queries/channels-from-sender.ts";
 import {
   CloseChannelSchema,
   ClaimChannelSchema,
   GetChannelsByIDSchema,
+  GetChannelsFromSender,
   OpenChannelSchema,
   UpdateChannelSchema,
 } from "../../shared/api-types.ts";
@@ -204,6 +206,37 @@ export const setRoutes = async (lucid: Lucid, app: e.Application) => {
         logger.error(
           `internal server error: ${error.stack}`,
           Routes.CHANNEL_WITH_ID,
+        );
+      }
+    }
+  });
+
+  /**
+   * Get channel from sender
+   */
+  app.get(Routes.CHANNELS_FROM_SENDER, async (req: Request, res: Response) => {
+    logger.info("handling request", Routes.CHANNELS_FROM_SENDER);
+    try {
+      const { senderAddress } = GetChannelsFromSender.parse(req.query);
+      const channelsFromSender = await getChannelsFromSender(
+        lucid,
+        senderAddress,
+      );
+      res.status(200).json(serializedResult(channelsFromSender));
+      logger.info(
+        `channel from sender with address ${senderAddress} found`,
+        Routes.CHANNELS_FROM_SENDER,
+      );
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ error: error.errors });
+        logger.error(`bad request: ${error}`, Routes.CHANNELS_FROM_SENDER);
+      } else {
+        res.status(500).json({ error: `${getErrorString(error.stack)}` });
+        logger.error(
+          `internal server error: ${error.stack}`,
+          Routes.CHANNELS_FROM_SENDER,
         );
       }
     }
