@@ -24,7 +24,7 @@ enum Routes {
   CLAIM = "/claim",
   CLOSE = "/close",
   ALL_CHANNELS = "/channels",
-  CHANNEL_WITH_ID = "/channels-with-id",
+  CHANNEL_WITH_ID = "/channel-with-id",
   CHANNELS_FROM_SENDER = "/channels-from-sender",
   CHANNELS_FROM_RECEIVER = "/channels-from-receiver",
 }
@@ -203,7 +203,7 @@ export const setRoutes = async (lucid: Lucid, app: e.Application) => {
         res.status(500).json({ error: `${getErrorString(error.stack)}` });
         logger.error(
           `internal server error: ${error.stack}`,
-          Routes.CHANNEL_WITH_ID
+          Routes.CHANNEL_WITH_ID,
         );
       }
     }

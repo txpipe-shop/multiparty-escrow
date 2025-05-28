@@ -195,7 +195,7 @@ paths:
         Example `curl` command:
 
         ```bash
-        curl http://localhost:3000/channels-with-id\?channelId\="b126f76547103204f62432999bcc2b5cb126f76547103204f62432999bcc2b5c0"
+        curl http://localhost:3000/channel-with-id\?channelId\="b126f76547103204f62432999bcc2b5cb126f76547103204f62432999bcc2b5c0"
       parameters:
         - name: channelId
           in: query
