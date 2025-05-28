@@ -212,7 +212,7 @@ export const setRoutes = async (lucid: Lucid, app: e.Application) => {
   });
 
   /**
-   * Get channel from sender
+   * Get channels from sender
    */
   app.get(Routes.CHANNELS_FROM_SENDER, async (req: Request, res: Response) => {
     logger.info("handling request", Routes.CHANNELS_FROM_SENDER);
