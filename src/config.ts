@@ -17,7 +17,6 @@ const envSchema = z
     PROVIDER_URL: z.string(),
     NETWORK: z.string(),
     CONFIG_FILE: z.string(),
-    SEED: z.string().optional(),
   })
   .readonly();
 
@@ -32,4 +31,23 @@ const configFileSchema = z.object({
   }),
 });
 const config = configFileSchema.parse(configFile);
-export { config, env };
+
+// For testing purposes only
+const seedSchema = z
+  .string()
+  .refine(
+    (s) =>
+      s.startsWith("SEED=") &&
+      s.split("=").length === 2 &&
+      s.split("=").pop()?.split(" ").length === 24,
+    {
+      message:
+        "Invalid .test-env format. See the README file for the correct format.",
+    },
+  )
+  .transform((s) => s.split("=").pop() as string);
+const testEnvFile = fs.readFileSync("./.test-env", "utf-8");
+const testEnv = {
+  SEED: seedSchema.parse(testEnvFile),
+};
+export { config, env, testEnv };

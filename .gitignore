@@ -12,4 +12,5 @@ target
 **/node_modules
 **/config.json
 
+# Do not remove the following line
 .test-env

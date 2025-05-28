@@ -1,6 +1,6 @@
 import { Data } from "@spacebudz/lucid";
 import { getCMLPrivateKey, signMessage } from "./utils.ts";
-import { env } from "../../config.ts";
+import { testEnv } from "../../config.ts";
 import assert from "assert";
 
 const args = process.argv.slice(2);
@@ -31,9 +31,13 @@ assert(
   "USAGE: npm run sign -- -c <channelId> -n <nonce> -a <amount>",
 );
 
+if (!testEnv.SEED) {
+  throw new Error("SEED not found in .test-env file");
+}
+
 console.log(
   signMessage(
-    getCMLPrivateKey(env.SEED as string),
+    getCMLPrivateKey(testEnv.SEED),
     Data.to(
       [nonce, channelId, amount] as [bigint, string, bigint],
       Data.Tuple([Data.Integer(), Data.Bytes(), Data.Integer()]),
