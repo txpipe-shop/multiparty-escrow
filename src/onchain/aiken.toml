@@ -25,5 +25,5 @@ bytes = "41474958"
 encoding = "base16"
 
 [config.default.agix_policy]
-bytes = "921e27e15e2552a40515564ba10a26ecb1fe1a34ac6ccb58c1ce1320"
+bytes = "d441227553a0f1a965fee7d60a0f724b368dd1bddbc208730fccebcf"
 encoding = "base16"
