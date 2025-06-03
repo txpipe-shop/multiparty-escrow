@@ -18,7 +18,8 @@
     "test-all": "tsx --experimental-wasm-modules --experimental-specifier-resolution=node ./offchain/test/combined-operations.ts",
     "cli-preview": "tsx --experimental-wasm-modules --experimental-specifier-resolution=node ./offchain/test/testnet.ts",
     "deploy": "tsx --experimental-wasm-modules --experimental-specifier-resolution=node ./offchain/test/deploy.ts",
-    "sign": "tsx --experimental-wasm-modules --experimental-specifier-resolution=node ./offchain/test/sign-msg.ts"
+    "sign": "tsx --experimental-wasm-modules --experimental-specifier-resolution=node ./offchain/test/sign-msg.ts",
+    "tx3-open": "npx tsx tx3-offchain/test/open.ts"
   },
   "author": "",
   "license": "ISC",
