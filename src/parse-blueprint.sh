@@ -13,6 +13,6 @@ cd $I_PWD
 SCRIPT_NAME=$(basename "$0")
 LUCID="@spacebudz/lucid"
  # TODO: regex to match any version of this file
-DENO_PATH="https://deno.land/x/lucid@0.20.5/mod.ts"
+DENO_PATH="https://deno.land/x/lucid@0.20.7/mod.ts"
 grep -rl "$DENO_PATH" . | grep -v "$SCRIPT_NAME" |  xargs sed -i "s#$DENO_PATH#$LUCID#g"
 grep -rl "export type Data = Data;" . | grep -v "$SCRIPT_NAME" | xargs sed -i "/export type Data = Data;/d"

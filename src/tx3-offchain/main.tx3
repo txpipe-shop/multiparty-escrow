@@ -1,0 +1,69 @@
+asset Agix = 0x921e27e15e2552a40515564ba10a26ecb1fe1a34ac6ccb58c1ce1320.AGIX;
+policy Script = 0x7da6163888081e317f8567176057f0e9634932f85bc630657b1f8133;
+
+party Sender;
+
+
+type ChannelInfo {
+    channel_id: Bytes,
+    nonce: Int,
+    signer: Bytes,
+    receiver: Bytes,
+    group_id: Bytes,
+    expirationDate: Int,
+}
+
+tx open(
+    initialDeposit: Int,
+    channelId: Bytes,
+    groupId: Bytes,
+    date: Int,
+    inputRef: UtxoRef,
+    policyId: Bytes,
+    tokenName: Bytes,
+    signerPubkey: Bytes,
+    receiverInput: Bytes,
+    since: Int,
+    until: Int,
+) {
+    reference validator {
+        ref: 0x82af870a1773a793127f34d55634fa6ad774988b301e4f8e1df04ca2724b98d8#0,
+    }
+
+    input source {
+        from: Sender,
+        ref: inputRef,
+    }
+
+    mint {
+        amount: AnyAsset(policyId, tokenName, 1),
+        redeemer: (),
+    }
+
+    output target {
+        to: Script,
+        amount: Agix(initialDeposit) + Ada(5000000) + AnyAsset(policyId, tokenName, 1),
+        datum: ChannelInfo {
+            channel_id: channelId,
+            nonce: 0,
+            signer: signerPubkey,
+            receiver: receiverInput,
+            group_id: groupId,
+            expirationDate: date,
+        },
+    }
+
+    output {
+        to: Sender,
+        amount: source - Agix(initialDeposit) - fees - Ada(5000000),
+    }
+
+    collateral {
+        ref: 0x36f545ec1fd3c4c5141b342c5a7e0d5a7592a13e49d0ae61082e91d90303d524#5,
+    }
+
+    validity {
+        valid_until: until,
+        valid_since: since,
+    }
+}

@@ -5,7 +5,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsx watch --experimental-wasm-modules ./api/index.ts",
-    "lint": "npx eslint .",
+    "lint": "npx eslint . --ignore-pattern tx3-offchain/gen",
     "pretty": "npx prettier --check .",
     "pretty-write": "npx prettier --write .",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
