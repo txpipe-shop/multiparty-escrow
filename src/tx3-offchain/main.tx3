@@ -13,6 +13,13 @@ type ChannelInfo {
     expirationDate: Int,
 }
 
+
+type Action {
+  Update,
+  Claim,
+  Close,
+}
+
 tx open(
     initialDeposit: Int,
     channelId: Bytes,
@@ -68,3 +75,37 @@ tx open(
     }
 }
 
+tx close(channelUtxo: UtxoRef, policyId: Bytes, tokenName: Bytes, since: Int, until: Int) {
+    reference validator {
+        ref: 0x82af870a1773a793127f34d55634fa6ad774988b301e4f8e1df04ca2724b98d8#0,
+    }
+
+    input target {
+        from: Script,
+        ref: channelUtxo,
+        redeemer: Action::Close {},
+    }
+
+    mint {
+        amount: AnyAsset(policyId, tokenName, -1),
+        redeemer: (),
+    }
+
+    output {
+        to: Sender,
+        amount: target - fees - AnyAsset(policyId, tokenName, 1),
+    }
+
+    validity {
+        until_slot: until,
+        since_slot: since,
+    }
+
+    collateral {
+        ref: 0x36f545ec1fd3c4c5141b342c5a7e0d5a7592a13e49d0ae61082e91d90303d524#5,
+    }
+
+    signers {
+        Sender,
+    }
+}

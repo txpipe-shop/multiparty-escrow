@@ -1,4 +1,4 @@
-import { Address, AssetId, NetworkId } from "@blaze-cardano/core";
+import { Address, AssetId } from "@blaze-cardano/core";
 import { U5C } from "@utxorpc/blaze-provider";
 import { config } from "../../config.ts";
 import { SingularityChannelMint } from "../blueprint.ts";
@@ -6,12 +6,8 @@ import { protocol } from "../gen/typescript/protocol.ts";
 import { bech32ToPubKeyHash } from "../utils/string.ts";
 import { toPreviewBlockSlot } from "../utils/time.ts";
 
-const provider = new U5C({
-  url: "http://localhost:50051",
-  network: NetworkId.Testnet,
-});
-
 export const openChannel = async (
+  provider: U5C,
   sender: string,
   receiver: string,
   signerPubKey: string,
