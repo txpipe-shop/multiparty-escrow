@@ -25,7 +25,7 @@ jobs:
 
       - name: Run ESLint
         working-directory: src
-        run: npx eslint .
+        run: npx eslint . --ignore-pattern tx3-offchain/gen
 
       - name: Run Prettier
         working-directory: src

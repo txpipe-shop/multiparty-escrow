@@ -5,7 +5,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsx watch --experimental-wasm-modules ./api/index.ts",
-    "lint": "npx eslint .",
+    "lint": "npx eslint . --ignore-pattern tx3-offchain/gen",
     "pretty": "npx prettier --check .",
     "pretty-write": "npx prettier --write .",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
@@ -18,13 +18,17 @@
     "test-all": "tsx --experimental-wasm-modules --experimental-specifier-resolution=node ./offchain/test/combined-operations.ts",
     "cli-preview": "tsx --experimental-wasm-modules --experimental-specifier-resolution=node ./offchain/test/testnet.ts",
     "deploy": "tsx --experimental-wasm-modules --experimental-specifier-resolution=node ./offchain/test/deploy.ts",
-    "sign": "tsx --experimental-wasm-modules --experimental-specifier-resolution=node ./offchain/test/sign-msg.ts"
+    "sign": "tsx --experimental-wasm-modules --experimental-specifier-resolution=node ./offchain/test/sign-msg.ts",
+    "tx3-open": "npx tsx tx3-offchain/test/open.ts",
+    "generate-blaze-blueprint": "npx txs tx3-offchain/generateBlueprint.ts"
   },
   "author": "",
   "license": "ISC",
   "description": "",
   "type": "module",
   "dependencies": {
+    "@blaze-cardano/blueprint": "^0.6.0",
+    "@blaze-cardano/data": "^0.6.0",
     "@dcspark/cardano-multiplatform-lib-nodejs": "^6.2.0",
     "@ptkdev/logger": "^1.8.0",
     "@spacebudz/lucid": "npm:@jsr/spacebudz__lucid@^0.20.9",

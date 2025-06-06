@@ -30,6 +30,9 @@ const configFileSchema = z.object({
   ref_script: z.object({
     txHash: z.string(),
   }),
+  sender: z.string(),
+  receiver: z.string(),
+  signer_pub_key: z.string(),
 });
 const config = configFileSchema.parse(configFile);
 export { config, env };

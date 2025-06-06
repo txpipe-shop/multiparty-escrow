@@ -2,6 +2,7 @@ import { Lucid } from "@spacebudz/lucid";
 import e, { Request, Response } from "express";
 import { z } from "zod";
 import { config } from "../../config.ts";
+import { claim } from "../../offchain/builders/claim.ts";
 import { closeChannel } from "../../offchain/builders/close-channel.ts";
 import { openChannel } from "../../offchain/builders/open-channel.ts";
 import { updateChannel } from "../../offchain/builders/update-channel.ts";
@@ -20,7 +21,6 @@ import {
 } from "../../shared/api-types.ts";
 import { logger } from "../../shared/logger.ts";
 import { getErrorString, serializedResult } from "../utils.ts";
-import { claim } from "../../offchain/builders/claim.ts";
 
 enum Routes {
   OPEN = "/open",
