@@ -20,13 +20,7 @@ use types.{Action, Claim, Close, Datum, Update}
 
 validator channel {
   mint(_redeemer: Data, policy_id: PolicyId, self: Transaction) {
-    let Transaction {
-      inputs,
-      mint,
-      outputs,
-      validity_range,
-      ..
-    } = self
+    let Transaction { inputs, mint, outputs, validity_range, .. } = self
     expect [(_, minted_name, minted_quantity)] = mint |> flatten
 
     if minted_quantity > 0 {

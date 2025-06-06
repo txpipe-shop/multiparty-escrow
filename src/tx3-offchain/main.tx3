@@ -63,7 +63,8 @@ tx open(
     }
 
     validity {
-        valid_until: until,
-        valid_since: since,
+        until_slot: until,
+        since_slot: since,
     }
 }
+
